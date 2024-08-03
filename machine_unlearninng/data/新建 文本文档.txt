@@ -1,0 +1,2 @@
+存储的是数据集 分别是  pathmnist  octmnist retinamnist dermamnist
+  asd diabetes death 具体数据集获取在论文中
