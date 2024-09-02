@@ -1,16 +1,10 @@
 # AdaptForget
 
-------
-
 This repository contains the implementation of AdaptForgetfrom:
 
 AdaptForget: A Domain Adaptive Feature-Level Forgetting Approach Can Achieve Individual-Level Data Forgetting in Healthcare
 
 # Prerequisites:
-------
-
-
-
 ```python
 python == 3.7.0
 pytorch == 1.10.1+cu113
@@ -25,25 +19,31 @@ conda env create --file environment.yaml
 
 # Dataset:
 
-------
-
-
+We used seven datasets for testing, namely DermaMNIST, PathMNIST, RetinaMNIST, OCTMNIST, ASD, MDD, and Diabetes.
 
 
 
 # Training:
 
-------
+1. Train the original model.
 
-1.train the original models
+Run the corresponding dataset training code.
 
-2.unlearning
+```python
+cd ./train_the_original_models
+python orresponding_dataset_train.py
+```
 
+2. Perform forgetting, auditing, and evaluation.
 
+Run the corresponding dataset unlearningcode.
 
-
+```python
+cd ..
+cd ./adversarial
+python orresponding_dataset_unlearning.py
+```
 
 # Contact
 
-------
-
+If you have any problem about our code, feel free to contact wb1696843361@gmail.com
