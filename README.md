@@ -1,8 +1,8 @@
 # AdaptForget
 
-This repository contains the implementation of AdaptForgetfrom:
+This repository contains the implementation of AdaptForget :
 
-AdaptForget: A Domain Adaptive Feature-Level Forgetting Approach Can Achieve Individual-Level Data Forgetting in Healthcare
+AdaptForget: A Domain-Adaptive Feature-Level Unlearning Approach for Achieving Single-Entry Data Forgetting in Healthcare
 
 # Prerequisites:
 ```python
