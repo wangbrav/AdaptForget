@@ -1,4 +1,3 @@
-# From https://github.com/vikram2000b/bad-teaching-unlearning
 
 import torch
 from sklearn.metrics import f1_score
@@ -29,50 +28,44 @@ def validation_step(model, batch, device):
     model.eval()
     images,  clabels = batch
     # images, labels, clabels = batch
-    # images = images.unsqueeze(0)  # 增加一个批次维度  jinxing dange shujuji yiwang de shihou women tianjiade
+    # images = images.unsqueeze(0) 
 
     images, clabels = images.to(device), clabels.to(device)
-    # print( clabels.shape)
-    # print(clabels)
 
-    out = model(images)  # Generate predictions
+
+    out = model(images) 
     tensor11 = torch.randn(1, 1)
     if clabels.size() == tensor11.size() :
-        # 如果是标量，增加一个维度并转换为 long 类型
         clabels = clabels.squeeze(0).long()
 
-        # print(clabels.dim())
     else:
-        # 如果不是标量，仅转换类型为 long
-        clabels = clabels.squeeze().long()  # 注意，这里的 squeeze 实际上不会改变形状
-        # print(clabels.dim())
+        clabels = clabels.squeeze().long()  
 
 
-    # clabels = clabels.squeeze().long()  # 是path的
+    # clabels = clabels.squeeze().long() 
     out_np = out.cpu().detach().numpy()
     clabels_np = clabels.cpu().detach().numpy()
     preds = torch.argmax(out, dim=1).cpu().detach().numpy()
     # print(out)
     # print(clabels)
     # print(out.shape, clabels.shape)
-    loss = F.cross_entropy(out, clabels)  # Calculate loss
-    acc = accuracy(out, clabels)  # Calculate accuracy
-    f1 = f1_score(clabels_np, preds, average='weighted')  # You can choose 'macro', 'micro', etc.
+    loss = F.cross_entropy(out, clabels)  
+    acc = accuracy(out, clabels)  
+    f1 = f1_score(clabels_np, preds, average='weighted')  
 
     return {"Loss": loss.detach(), "Acc": acc, "F1": f1}
 
 
 def validation_epoch_end(model, outputs):
     batch_losses = [x["Loss"] for x in outputs]
-    epoch_loss = torch.stack(batch_losses).mean()  # Combine losses
+    epoch_loss = torch.stack(batch_losses).mean()  
     batch_accs = [x["Acc"] for x in outputs]
-    epoch_acc = torch.stack(batch_accs).mean()  # Combine accuracies
-    # 转换 F1 分数为张量并确保是张量
+    epoch_acc = torch.stack(batch_accs).mean()  
+
     batch_f1s = [torch.tensor(x["F1"], dtype=torch.float32) if not isinstance(x["F1"], torch.Tensor) else x["F1"]
                  for x in outputs]
-    epoch_f1 = torch.stack(batch_f1s).mean()  # 组合并计算均值
-    # batch_f1s = [x["F1"] for x in outputs]
-    # epoch_f1 = torch.stack(batch_f1s).mean()  # Combine accuracies
+    epoch_f1 = torch.stack(batch_f1s).mean()  
+
     return {"Loss": epoch_loss.item(), "Acc": epoch_acc.item(), "F1": epoch_f1.item()}
 
 
@@ -133,7 +126,6 @@ def fit_one_cycle(
             if epoch <= 1 and milestones:
                 warmup_scheduler.step()
 
-        # Validation phase
         result = evaluate(model, val_loader, device)
         result["train_loss"] = torch.stack(train_losses).mean().item()
         result["lrs"] = lrs
