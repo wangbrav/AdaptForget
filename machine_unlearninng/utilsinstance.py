@@ -13,7 +13,6 @@ from typing import *
 
 import itertools
 from itertools import cycle
-# from resnet import resnet18, resnet34, resnet50
 
 import numpy as np
 import random
@@ -110,34 +109,14 @@ def adv_attack(args, model, device, train_loader, adversary, unlearn_k, num_adv_
 
         for batch_idx, (data, target) in enumerate(train_loader):
             data, target = data.to(device), target.to(device)
-
-            # attack_label = torch.rand(data.shape[0]).cuda() * 10
-            # # attack_label = torch.rand(data.shape[0]).cuda() * 9
-            # attack_label = attack_label.to(torch.long)
-            # target = target.squeeze().long()  # 是path的
-            #
-            # # attack_label = torch.where(attack_label == target, (torch.rand(data.shape[0]).long().cuda()*9 + 9) // 2, attack_label)
-            # attack_label = torch.where(attack_label == target, (torch.rand(data.shape[0]).long().cuda()*10 + 10) // 2, attack_label)
-
-            # attack_label = torch.randint(0, 9, (data.shape[0],)).cuda()  # 生成[0, 9)之间的整数
-            # attack_label = attack_label.to(torch.long)
-            # target = target.squeeze().long()  # 是path的
-            # attack_label = torch.where(attack_label == target,(attack_label + torch.randint(1, 9, (data.shape[0],)).cuda()) % 9, attack_label)
-            attack_label = torch.randint(0, 4, (data.shape[0],)).cuda()  # 生成[0, 9)之间的整数
+            attack_label = torch.randint(0, 4, (data.shape[0],)).cuda()  
             attack_label = attack_label.to(torch.long)
-            # target = target.squeeze().long()  # 是path的
             tensor11 = torch.randn(1, 1)
-            # print("target.size():", target.size())
             if target.size() == tensor11.size():
-                # 如果是标量，增加一个维度并转换为 long 类型
                 target = target.squeeze(0).long()
-                # print(clabels.dim())
             else:
-                # 如果不是标量，仅转换类型为 long
-                target = target.squeeze().long()  # 注意，这里的 squeeze 实际上不会改变形状
+                target = target.squeeze().long() 
             attack_label = torch.where(attack_label == target,(attack_label + torch.randint(1, 3, (data.shape[0],)).cuda()) % 3, attack_label)
-            # print((torch.rand(data.shape[0]).long().cuda()*10 + 10) // 2)
-            # target = target.squeeze().long()  # 是path的
 
             adv_example = adversary.perturb(data, attack_label)
 
@@ -152,27 +131,6 @@ def adv_attack(args, model, device, train_loader, adversary, unlearn_k, num_adv_
             
     return attacked_image_arr, target_label_arr
         
-
-
-# def test(model, device, test_loader):
-#     model.eval()
-#     test_loss = 0
-#     correct = 0
-#     CE = nn.CrossEntropyLoss()
-#
-#     with torch.no_grad():
-#         for data, target in test_loader:
-#             data, target = data.to(device), target.to(device)
-#             output = model(data)
-#             test_loss += CE(output, target)  # sum up batch loss
-#             pred = output.argmax(dim=1, keepdim=True)  # get the index of the max log-probability
-#             correct += pred.eq(target.view_as(pred)).sum().item()
-#
-#     test_loss /= len(test_loader.dataset)
-#
-#     return test_loss, 100. * correct / len(test_loader.dataset)
-
-
 
 
 def testins(model, device, test_loader):
@@ -194,29 +152,20 @@ def testins(model, device, test_loader):
             #     如果是标量，增加一个维度并转换为 long 类型
                 target = target.squeeze(0).long()
 
-                # print(clabels.dim())
             else:
-                # 如果不是标量，仅转换类型为 long
-                target = target.squeeze().long()  # 注意，这里的 squeeze 实际上不会改变形状
-                # print(clabels.dim())
+                target = target.squeeze().long()  
             # target = target.long()
-            # test_loss += CE(output, target).item()  # sum up batch loss  #  因为单样本的原因去掉了先
+            # test_loss += CE(output, target).item() 
             pred = output.argmax(dim=1, keepdim=True).squeeze(1)  # get the index of the max log-probability
             correct += pred.eq(target).sum().item()
-            # print("Length of total_target:", len(total_target))
-            # print("Length of total_pred:", len(total_pred))
-            # Append predictions and targets for F1 score calculation
             total_pred.extend(pred.cpu().numpy())
             if target.ndim == 0:
-                # 如果 target 是零维，将其转换为一个元素的数组
-                total_target.append(target.item())  # 如果 target 是张量
-                # 或者
-                total_target.append(target)  # 如果 target 已经是一个数字
+                total_target.append(target.item())  
+        
+                total_target.append(target) 
             else:
-                # 正常处理非零维情况
-                total_target.extend(target.cpu().numpy())            # total_target.extend(target.cpu().numpy())
+                total_target.extend(target.cpu().numpy())           
 
-    # test_loss /= len(test_loader.dataset)
     f1 = f1_score(total_target, total_pred, average='macro')  # Calculate macro F1 score
 
     return test_loss, 100. * correct / len(test_loader.dataset), f1

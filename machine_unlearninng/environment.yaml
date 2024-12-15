@@ -1,4 +1,4 @@
-name: afs
+name: adaptforget
 channels:
   - conda-forge
   - defaults

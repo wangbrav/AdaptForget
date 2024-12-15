@@ -14,14 +14,7 @@ from medmnist import INFO, Evaluator
 from tqdm import tqdm
 def aggregate_predictions(models, X_test, weights):
     with torch.no_grad():
-        # 使用加权平均合并模型的 logits
         weighted_logits = sum(1 * model.feature_extractor(X_test) for model, weight in zip(models, weights))
-        # weighted_logits = sum(weight * model(X_test) for model, weight in zip(models, weights))
-        # 计算最终的概率分布
-        # probabilities = softmax(weighted_logits, dim=1)
-        # print(probabilities)
-        # final_prediction = probabilities.max(1)[1]
-        # print(weighted_logits)
     return weighted_logits
 
 def set_seed(seed=32):
@@ -30,17 +23,11 @@ def set_seed(seed=32):
     torch.manual_seed(seed)
     if torch.cuda.is_available():
         torch.cuda.manual_seed(seed)
-        torch.cuda.manual_seed_all(seed)  # 如果有多个GPU
+        torch.cuda.manual_seed_all(seed)
     torch.backends.cudnn.deterministic = True
     torch.backends.cudnn.benchmark = False
 set_seed(62)
 random_seed = 62
-# random.seed(random_seed)
-# np.random.seed(random_seed)
-# torch.manual_seed(random_seed)
-#
-# if torch.cuda.is_available():
-#     torch.cuda.manual_seed_all(random_seed)
 def set_seed(seed=32):
     random.seed(seed)
     np.random.seed(seed)
