@@ -116,8 +116,6 @@ from sklearn.metrics import precision_recall_fscore_support
 from sklearn.metrics import confusion_matrix
 from training_utils import *
 logging.basicConfig(filename='./tc/training_log_qf1circulate_asdv7.log', level=logging.INFO, format='%(asctime)s %(message)s')
-# logging.basicConfig(filename='./tc/pathablation.log', level=logging.INFO, format='%(asctime)s %(message)s')
-# logging.basicConfig(filename='./tc/pathtsne.log', level=logging.INFO, format='%(asctime)s %(message)s')
 logger = logging.getLogger()
 
 def parser():
@@ -126,47 +124,6 @@ def parser():
     """
     parser = argparse.ArgumentParser(prog='AFS')
     subparsers = parser.add_subparsers(help='sub-command help')
-    #
-    # parser_audit = subparsers.add_parser('audit')
-    # parser_audit.add_argument('--root',
-    #                     default='../template/MNIST',
-    #                     help='root dir to the project')
-    # parser_audit.add_argument('--query_label',
-    #                     default='EXP1',
-    #                     help='label of the query data, defined in Dataset.py/Config')
-    # parser_audit.add_argument('--cal_label',
-    #                     default='CAL1',
-    #                     help='label of the calibration data, defined in Dataset.py/Config')
-    # parser_audit.add_argument('--cal_test_label',
-    #                     default='CALTEST1',
-    #                     help='label of the calibration test data, defined in Dataset.py/Config')
-    # parser_audit.add_argument('--test_label',
-    #                     default='TEST1',
-    #                     help='label of the test data, defined in Dataset.py/Config')
-    # parser_audit.add_argument('--model2audit',
-    #                     default='./models/base/best_model.pth',
-    #                     help='relative path of model to be auditted to the root')
-    # parser_audit.add_argument('--model2cal',
-    #                     default='./models/cal/best_model.pth',
-    #                     help='relative path of the calibration model to the root')
-    # parser_audit.add_argument('--device',
-    #                     default='cuda:0')
-    # parser_audit.add_argument('--KP_infer_batch_size',
-    #                     type=int,
-    #                     default=1024,
-    #                     help='batch size for inference during membership attack')
-    # parser_audit.add_argument('--nclass',
-    #                     type=int,
-    #                     default=10,
-    #                     help='number of classes')
-    # parser_audit.add_argument('--num_workers',
-    #                     type=int,
-    #                     default=5,
-    #                     help='number of num_workers')
-    # parser_audit.add_argument('--command_class',
-    #                           default=0,
-    #                           type=int,
-    #                           help='for internal use only, no change')
 
     parser_forget = subparsers.add_parser('forget')
     parser_forget.add_argument('--root',
@@ -337,18 +294,7 @@ def afs(args,best_model_state_trained,best_model_state_retrained,base1_loader,ba
 
     optimizer_afs = torch.optim.Adam(snet.parameters(),
                                 lr=0.001)
-    # args.mode = 'base'
-    # args.base_label = args.KD_label
-    # baseDataset = DataModule(dir=args.root, args = args, batch_size = args.train_batch_size, num_workers=args.num_workers)
-    # baseTrainDataLoader = baseDataset.train_dataloader()
-    # baseTestDataLoader = baseDataset.test_dataloader()
-    # args.mode = 'query'
-    # queryDataset = DataModule(dir=args.root, args=args, batch_size = args.KP_infer_batch_size, num_workers=args.num_workers)
-    # member_gt = CONFIG[args.query_label]['QUERY_MEMBER']
-    # args.mode = 'cal'
-    # calDataset = DataModule(dir=args.root, args=args, batch_size = args.KP_infer_batch_size, num_workers=args.num_workers)
 
-    # logger.info('>> start KP')
     save_metric_best = 0
     # teacher_model = MLP(28, 64, 10).to(args.device)
     member_gt = [1 for i in range(100)]
@@ -398,38 +344,6 @@ def afs(args,best_model_state_trained,best_model_state_retrained,base1_loader,ba
 
     # args = parser(args.root)
 
-# def zero_gradients(x):
-#     if isinstance(x, torch.Tensor):
-#         if x.grad is not None:
-#             x.grad.detach_()
-#             x.grad.zero_()
-#     elif isinstance(x, collections.abc.Iterable):
-#         for elem in x:
-#             zero_gradients(elem)
-
-# def test(model, test_loader, device):
-#     model.eval()
-#     correct = 0
-#     total = 0
-#     with torch.no_grad():
-#         with tqdm(total=len(test_loader)) as t:
-#             for X, Y in tqdm(test_loader):
-#                 X, Y = X.to(device), Y.to(device)
-#                 outputs = model(X)
-#                 # _, predicted = torch.max(outputs.data, 1)
-#                   # 调整Y的形状和数据类型
-#
-#                 pred = outputs.data.max(1)[1]
-#                 # print(predicted.shape)
-#                 # print(Y.shape)
-#                 total += Y.size(0)
-#
-#                 # Y = Y.squeeze(1).long()    #表格数据集要注释 图片数据集要用的
-#                 correct += pred.eq(Y.view(-1)).sum().item()
-#                 # print(f'Batch correct: {(predicted == Y).sum().item()}, Batch total: {Y.size(0)}')  # 新增的打印语句
-#     print(f"Correct: {correct}, Total: {total}")
-#     accuracy = 100 * correct / total
-#     return accuracy
 
 
 def test(model, test_loader, device):
@@ -659,9 +573,6 @@ def instance(base1_dataset, base1_indices,test1_loader,best_model_state_retraine
     D_r_acc = []
     D_f_acc = []
     D_test_acc = []
-    # 一个是  用于其他的数据集  的准确性   一个用于数据集的忘却的准确性 一个是 用于测试集的准确性
-    # case1_D_r  case2_D_r  case3_D_r 是 三个方法
-    # 1 一种简单的方法 其中模型在为学习的数据上微调 2 一种使用对抗样本的方法  3 一种使用对抗样本和权重重要性的方法
     case1_D_r = []
     case2_D_r = []
     case3_D_r = []
@@ -710,8 +621,7 @@ def instance(base1_dataset, base1_indices,test1_loader,best_model_state_retraine
         # random.seed(args.seed)
 
         unlearn_label = args.unlearn_label
-        # 假设 dataset1 是通过 Subset 创建的，原始数据集是 pathmnist_dataset
-        subset_indices = base1_indices  # 获取 Subset 的索引
+        subset_indices = base1_indices  
         # train_labels = PathMNISTDataset.get_labels(train_dataset, subset_indices)
 
         # train_labels = dataset1.labels
@@ -761,131 +671,7 @@ def instance(base1_dataset, base1_indices,test1_loader,best_model_state_retraine
 
         optimizer = optim.SGD(model.parameters(), lr=args.unlearn_lr, momentum=0.9, weight_decay=1e-3)
 
-        # model = resnet18().to(device)
-        # smodelmlp_base2.load_state_dict(
-        #     torch.load('/root/autodl-tmp/wangbin/yiwang/qf1model/best_model_path_qf1_base2.pth'))
-        # def train_model(model, trainloader, validloader, optimizer, criterion, device, epochs=10):
-        #     model.to(device)
-        #     best_accuracy = 0
-        #     best_model_state = None  # 用于保存最佳模型的状态
-        #
-        #     for epoch in range(epochs):
-        #         model.train()
-        #         for inputs, labels in trainloader:
-        #             inputs, labels = inputs.to(device), labels.to(device)
-        #             optimizer.zero_grad()
-        #             outputs = model(inputs)
-        #             labels = labels.squeeze().long()
-        #             loss = criterion(outputs, labels)
-        #             loss.backward()
-        #             optimizer.step()
-        #
-        #         # 在每个epoch结束后在验证集上评估模型
-        #         model.eval()
-        #         correct = 0
-        #         total = 0
-        #         with torch.no_grad():
-        #             for inputs, labels in validloader:
-        #                 inputs, labels = inputs.to(device), labels.to(device)
-        #                 outputs = model(inputs)
-        #                 _, predicted = torch.max(outputs.data, 1)
-        #                 total += labels.size(0)
-        #                 correct += (predicted == labels).sum().item()
-        #
-        #         accuracy = 100 * correct / total
-        #         print(f'Epoch {epoch + 1}: Validation Accuracy = {accuracy:.2f}%')
-        #
-        #         # 如果这个epoch的准确率高于之前的最高准确率，更新最佳模型状态
-        #         if accuracy > best_accuracy:
-        #             best_accuracy = accuracy
-        #             best_model_state = model.state_dict().copy()  # 深拷贝模型状态
-        #
-        #     return best_model_state, best_accuracy
-
-        # # 训练模型并获得最佳模型状态
-        # def train_model(model, trainloader, validloader, optimizer, criterion, device, epochs=10,
-        #                 model_path='/root/autodl-tmp/wangbin/L2UL-main/weights/best_model.pth'):
-        #     model.to(device)
-        #     best_accuracy = 0
-        #     best_model_state = None  # 用于保存最佳模型的状态
-        #
-        #     for epoch in range(epochs):
-        #         model.train()
-        #         for inputs, labels in trainloader:
-        #             inputs, labels = inputs.to(device), labels.to(device)
-        #             optimizer.zero_grad()
-        #             outputs = model(inputs)
-        #             labels = labels.squeeze().long()
-        #             loss = criterion(outputs, labels)
-        #             loss.backward()
-        #             optimizer.step()
-        #
-        #         # 在每个epoch结束后在验证集上评估模型
-        #         model.eval()
-        #         correct = 0
-        #         total = 0
-        #         with torch.no_grad():
-        #             for inputs, labels in validloader:
-        #                 inputs, labels = inputs.to(device), labels.to(device)
-        #                 outputs = model(inputs)
-        #                 _, predicted = torch.max(outputs.data, 1)
-        #                 total += labels.size(0)
-        #                 correct += (predicted == labels).sum().item()
-        #
-        #         accuracy = 100 * correct / total
-        #         print(f'Epoch {epoch + 1}: Validation Accuracy = {accuracy:.2f}%')
-        #
-        #         # 如果这个epoch的准确率高于之前的最高准确率，更新最佳模型状态
-        #         if accuracy > best_accuracy:
-        #             best_accuracy = accuracy
-        #             best_model_state = model.state_dict().copy()  # 深拷贝模型状态
-        #             # 保存最佳模型的状态
-        #             torch.save(best_model_state, model_path)
-        #             print(f"Saved new best model with accuracy: {best_accuracy:.2f}%")
-        #
-        #     return best_model_state, best_accuracy
-        #
-        # def train_modelqf1(model, trainloader, validloader, optimizer, criterion, device, epochs=10,
-        #                    model_path='/root/autodl-tmp/wangbin/L2UL-main/weights/best_modelqf1.pth'):
-        #     model.to(device)
-        #     best_accuracy = 0
-        #     best_model_state = None  # 用于保存最佳模型的状态
-        #
-        #     for epoch in range(epochs):
-        #         model.train()
-        #         for inputs, labels in trainloader:
-        #             inputs, labels = inputs.to(device), labels.to(device)
-        #             optimizer.zero_grad()
-        #             outputs = model(inputs)
-        #             labels = labels.squeeze().long()
-        #             loss = criterion(outputs, labels)
-        #             loss.backward()
-        #             optimizer.step()
-        #
-        #         # 在每个epoch结束后在验证集上评估模型
-        #         model.eval()
-        #         correct = 0
-        #         total = 0
-        #         with torch.no_grad():
-        #             for inputs, labels in validloader:
-        #                 inputs, labels = inputs.to(device), labels.to(device)
-        #                 outputs = model(inputs)
-        #                 _, predicted = torch.max(outputs.data, 1)
-        #                 total += labels.size(0)
-        #                 correct += (predicted == labels).sum().item()
-        #
-        #         accuracy = 100 * correct / total
-        #         print(f'Epoch {epoch + 1}: Validation Accuracy = {accuracy:.2f}%')
-        #
-        #         # 如果这个epoch的准确率高于之前的最高准确率，更新最佳模型状态
-        #         if accuracy > best_accuracy:
-        #             best_accuracy = accuracy
-        #             best_model_state = model.state_dict().copy()  # 深拷贝模型状态
-        #             # 保存最佳模型的状态
-        #             torch.save(best_model_state, model_path)
-        #             print(f"Saved new best model with accuracy: {best_accuracy:.2f}%")
-        #
-        #     return best_model_state, best_accuracy
+    
 
         best_model_statet = best_model_state_strained
         best_model_stateqf1=best_model_state_retrained
@@ -894,11 +680,9 @@ def instance(base1_dataset, base1_indices,test1_loader,best_model_state_retraine
 
         model.load_state_dict(best_model_statet)
         # model.load_state_dict(torch.load('/root/autodl-tmp/wangbin/L2UL-main/weights/best_model.pth'))
-        #   输出模型的结构   为什么要输出模型的结构
 
         # normalize_layer = NormalizeLayer((0.4914, 0.4822, 0.4465), (0.2023, 0.1994, 0.2010))
         # model = torch.nn.Sequential(normalize_layer, model)
-        # 定义损失函数和优化器
         # criterion = nn.CrossEntropyLoss()
 
         # optimizer = optim.Adam(modelmlp.parameters(), lr=learning_rate)
@@ -958,41 +742,15 @@ def instance(base1_dataset, base1_indices,test1_loader,best_model_state_retraine
         qf1_model = deepcopy(model)
         qf1_model.load_state_dict(best_model_stateqf1)
 
-        # average_euclidean0, average_manhattan0, average_cosine_similarity0 = analyze_sample_similarity(qf1_model,
-        #                                                                                                device,
-        #                                                                                                train_dataset,
-        #                                                                                                CONFIG)
-        # average_euclidean1, average_manhattan1, average_cosine_similarity1 = analyze_sample_similarity(model, device,
-        #                                                                                                train_dataset,
-        #                                                                                                CONFIG)
-        # average_kl_div = calculate_kl_divergence(model, qf1_model, unlearn_loader, device)
-        # _t, pv, EMA_res, risk_score = api(device, model, unlearn_loader, member_gt, cal_1000_loader, caltest1_loader)
-        # print(
-        #     f' test value: {_t}, p_value: {pv}, ema: {EMA_res}, risk_score: {risk_score}')
-        # print(
-        #     f'average_euclidean0: {average_euclidean0}, average_manhattan0: {average_manhattan0}, average_cosine_similarity0: {average_cosine_similarity0}')
-        # print(
-        #     f'average_euclidean1: {average_euclidean1}, average_manhattan1: {average_manhattan1}, average_cosine_similarity1: {average_cosine_similarity1}')
-        # print(f'average_kl_div: {average_kl_div}')
+
         case1_D_test.append(test_acc)
         case1_D_r.append(other_acc)
         case1_D_f.append(unlearn_acc)
 
-        # model = resnet18().to(device)
-        # model.load_state_dict(torch.load('./cifar10_pretrained_models/resnet18.pt'))
-        # normalize_layer = NormalizeLayer((0.4914, 0.4822, 0.4465), (0.2023, 0.1994, 0.2010))
-        # model = torch.nn.Sequential(normalize_layer, model)
+      
         model = get_student_model().to(device)
-        # normalize_layer = NormalizeLayer((0.5, 0.5, 0.5), (0.5, 0.5, 0.5))
-        # model = torch.nn.Sequential(normalize_layer, model)
-        # model = resnet18().to(device)
+  
         model.load_state_dict(best_model_statet)
-
-        # model.load_state_dict(torch.load("/root/autodl-tmp/wangbin/L2UL-main/weights/best_model_path_base1.pth"))
-        # best_model_state, best_accuracy = train_model(model, base1_loader, test1_loader, optimizer, criterion, device)
-        # (print
-        #  (f'Best Validation Accuracy: {best_accuracy:.2f}%'))
-        # model.load_state_dict(best_model_state)
 
         optimizer = optim.SGD(model.parameters(), lr=args.unlearn_lr, momentum=0.9, weight_decay=1e-3)
 
@@ -1045,18 +803,16 @@ def instance(base1_dataset, base1_indices,test1_loader,best_model_state_retraine
 
                 output_adv = model(adv_data.to(device))
                 output = model(data.to(device))
-                # target = target.squeeze().long()  # 是path的
-                # adv_target = adv_target.squeeze().long()  # 是path的
+                # target = target.squeeze().long() 
+                # adv_target = adv_target.squeeze().long()  
                 tensor11 = torch.randn(1, 1)
                 # print("target.size():", target.size())
                 if target.size() == tensor11.size():
-                    # 如果是标量，增加一个维度并转换为 long 类型
                     target = target.squeeze(0).long()
                 else:
-                    target = target.squeeze().long()  # 注意，这里的 squeeze 实际上不会改变形状
+                    target = target.squeeze().long()  
 
                 if adv_target.size() == tensor11.size():
-                    # 如果是标量，增加一个维度并转换为 long 类型
                     adv_target = adv_target.squeeze(0).long()
                 else:
                     # 如果不是标量，仅转换类型为 long
@@ -1096,23 +852,6 @@ def instance(base1_dataset, base1_indices,test1_loader,best_model_state_retraine
         member_gt = [1 for i in range(1)]
         qf1_model = deepcopy(model)
         qf1_model.load_state_dict(best_model_stateqf1)
-        #
-        # average_euclidean0, average_manhattan0, average_cosine_similarity0 = analyze_sample_similarity(qf1_model,
-        #                                                                                                device,
-        #                                                                                                train_dataset,
-        #                                                                                                CONFIG)
-        # average_euclidean1, average_manhattan1, average_cosine_similarity1 = analyze_sample_similarity(model, device,
-        #                                                                                                train_dataset,
-        #                                                                                                CONFIG)
-        # average_kl_div = calculate_kl_divergence(model, qf1_model, unlearn_loader, device)
-        # _t, pv, EMA_res, risk_score = api(device, model, unlearn_loader, member_gt, cal_1000_loader, caltest1_loader)
-        # print(
-        #     f' test value: {_t}, p_value: {pv}, ema: {EMA_res}, risk_score: {risk_score}')
-        # print(
-        #     f'average_euclidean0: {average_euclidean0}, average_manhattan0: {average_manhattan0}, average_cosine_similarity0: {average_cosine_similarity0}')
-        # print(
-        #     f'average_euclidean1: {average_euclidean1}, average_manhattan1: {average_manhattan1}, average_cosine_similarity1: {average_cosine_similarity1}')
-        # print(f'average_kl_div: {average_kl_div}')
 
         case2_D_test.append(test_acc)
         case2_D_r.append(other_acc)
@@ -1121,24 +860,9 @@ def instance(base1_dataset, base1_indices,test1_loader,best_model_state_retraine
         print()
         print('\n Baseline 3: Our Appraoch - using both adversarial examples and weight importance')
 
-        # model = resnet18().to(device)
-        # model.load_state_dict(torch.load('./cifar10_pretrained_models/resnet18.pt'))
-        # normalize_layer = NormalizeLayer((0.4914, 0.4822, 0.4465), (0.2023, 0.1994, 0.2010))
-        # model = torch.nn.Sequential(normalize_layer, model)
         model = get_student_model().to(device)
-        # normalize_layer = NormalizeLayer((0.5, 0.5, 0.5), (0.5, 0.5, 0.5))
-        # normalize_layer = NormalizeLayer((0.4914, 0.4822, 0.4465), (0.2023, 0.1994, 0.2010))
-        # model = torch.nn.Sequential(normalize_layer, model)
-        # model = resnet18().to(device)
         model.load_state_dict(best_model_statet)
 
-        # best_model_state, best_accuracy = train_model(model, base1_loader, test1_loader, optimizer, criterion, device)
-        # (print
-        #  (f'Best Validation Accuracy: {best_accuracy:.2f}%'))
-        # model.load_state_dict(best_model_state)
-
-        # model.load_state_dict(torch.load("/root/autodl-tmp/wangbin/L2UL-main/weights/best_model_path_base1.pth"))
-        # optimizer = optim.SGD(model.parameters(), lr=args.unlearn_lr, momentum=0.9, weight_decay=1e-3)
         optimizer = optim.SGD(model.parameters(), lr=0.001, momentum=0.9, weight_decay=1e-3)
 
         origin_params = {n: p.clone().detach() for n, p in model.named_parameters() if p.requires_grad}
@@ -1186,15 +910,15 @@ def instance(base1_dataset, base1_indices,test1_loader,best_model_state_retraine
 
                 output_adv = model(adv_data.to(device))
                 output = model(data.to(device))
-                # target = target.squeeze().long()  # 是path的
-                # adv_target = adv_target.squeeze().long()  # 是path的
+                # target = target.squeeze().long()  # 
+                # adv_target = adv_target.squeeze().long()  #
                 tensor11 = torch.randn(1, 1)
                 # print("target.size():", target.size())
                 if target.size() == tensor11.size():
                     # 如果是标量，增加一个维度并转换为 long 类型
                     target = target.squeeze(0).long()
                 else:
-                    target = target.squeeze().long()  # 注意，这里的 squeeze 实际上不会改变形状
+                    target = target.squeeze().long()
 
                 if adv_target.size() == tensor11.size():
                     # 如果是标量，增加一个维度并转换为 long 类型
@@ -1202,7 +926,7 @@ def instance(base1_dataset, base1_indices,test1_loader,best_model_state_retraine
 
                     # print(clabels.dim())
                 else:
-                    adv_target = adv_target.squeeze().long()  # 注意，这里的 squeeze 实际上不会改变形状
+                    adv_target = adv_target.squeeze().long()  #
                 loss_unlearn = -CE(output, target.to(device)) * (data.shape[0] / (adv_data.shape[0] + data.shape[0]))
                 loss_adv = CE(output_adv, adv_target.to(device)) * (
                             adv_data.shape[0] / (adv_data.shape[0] + data.shape[0]))
@@ -1424,49 +1148,47 @@ def calculate_tp_fp_fn(y_true, y_pred):
 def calculate_f1_score(y_true, y_pred):
     tp, fp, fn = calculate_tp_fp_fn(y_true, y_pred)
     if 2 * tp + fp + fn == 0:
-        return 0  # 避免除以0的错误
+        return 0  # 
     f1 = 2 * tp / (2 * tp + fp + fn)
     return f1
 def adjust_shards(shards):
     # 检查每个分片
     for i in range(len(shards)):
         if len(shards[i]) % 32 == 1:
-            # 如果当前分片大小不符合要求，尝试调整
-            if i < len(shards) - 1:  # 确保不是最后一个分片
-                # 从下一个分片中借一个元素
+            if i < len(shards) - 1:  # 
+                # 
                 shards[i] = np.append(shards[i], shards[i+1][0])
                 shards[i+1] = shards[i+1][1:]
             else:
-                # 如果是最后一个分片，从前一个分片借
+                # 
                 shards[i-1] = np.append(shards[i-1], shards[i][0])
                 shards[i] = shards[i][1:]
     return shards
 def aggregate_predictions(models, X_test, weights):
     with torch.no_grad():
-        # 使用加权平均合并模型的 logits
+        # 
         weighted_logits = sum(weight * model(X_test) for model, weight in zip(models, weights))
-        # 计算最终的概率分布
+        # 
         probabilities = softmax(weighted_logits, dim=1)
         final_prediction = probabilities.max(1)[1]
     return final_prediction
 def sisa(train_dataset,CONFIG,qf_50_loader,test1_loader,base2_loader,kd0_5_loader_no,cal_100_loader, caltest1_loader,device,random_seed):
-    # 首先生成随机打乱的索引
+    # 】
     indices = np.random.permutation(len(Subset(train_dataset, CONFIG['BASE1']['BASE'])))
 
     # 分片
     shards = np.array_split(indices, 10)
 
-    # 调整分片以确保每个分片的大小不满足 len(shard) % 32 == 1
     shards = adjust_shards(shards)
 
-    # 划分数据为三个片段
+    # 
     # shards = np.array_split(np.random.permutation(len(Subset(train_dataset, CONFIG['BASE1']['BASE']))), 10)
     print(len(Subset(train_dataset, CONFIG['BASE1']['BASE'])))
     models = []
     accuracies = []
     # for i, shard in enumerate(shards):
     #     print(f"Length of shard {i + 1}: {len(shard)}")
-    # 训练模型并计算准确率
+    # 
     for shard in shards:
         # X_shard = X[shard]
         # y_shard = y[shard]
@@ -1480,7 +1202,7 @@ def sisa(train_dataset,CONFIG,qf_50_loader,test1_loader,base2_loader,kd0_5_loade
         criterion = nn.CrossEntropyLoss()
         optimizer = optim.Adam(model.parameters(), lr=0.001)
 
-        # 训练模型
+        # 
         model.train()
         for epoch in range(20):
             for data, target in dataloader:
@@ -1495,13 +1217,13 @@ def sisa(train_dataset,CONFIG,qf_50_loader,test1_loader,base2_loader,kd0_5_loade
                 loss.backward()
                 optimizer.step()
 
-        # 计算准确率
+        # 
         correcttt = 0
         totaltt = 0
         all_labels = []
         all_preds = []
         model.eval()
-        with torch.no_grad():  # 确保不更新梯度
+        with torch.no_grad():  # 
             for data in test1_loader:
                 inputs, labels = data[0].to(device), data[1].to(device)
                 # inputs, labels = data[0].to(device), data[1].to(device)
@@ -1514,19 +1236,19 @@ def sisa(train_dataset,CONFIG,qf_50_loader,test1_loader,base2_loader,kd0_5_loade
                 # print(predicted)
                 # print(labels.size(0))
                 totaltt += labels.size(0)
-                labels = labels.squeeze()  # 在path中使用
+                labels = labels.squeeze()  # 
                 # print((predicted == labels).sum().item())
                 # correcttt = (predicted == labels).sum().item()
-                correcttt += (predicted == labels).sum().item()  # 计算 mnist 数据集的时候就没有问题
+                correcttt += (predicted == labels).sum().item()  # 
 
         all_labels_np = np.array(all_labels)
         all_preds_np = np.array(all_preds)
 
-        # 计算混淆矩阵
+        # 
         conf_matrix = confusion_matrix(all_labels_np, all_preds_np)
-        TP = conf_matrix[1, 1]  # 真正例
-        FP = conf_matrix[0, 1]  # 假正例
-        FN = conf_matrix[1, 0]  # 假负例
+        TP = conf_matrix[1, 1]  # 
+        FP = conf_matrix[0, 1]  # 
+        FN = conf_matrix[1, 0]  # 
         f1 = 2 * TP / (2 * TP + FP + FN)
         # f1_macro = f1_score(all_labels_np, all_preds_np, average='macro')
         precision, recall, f1_score, _ = precision_recall_fscore_support(all_labels, all_preds, average='weighted')
@@ -1540,24 +1262,11 @@ def sisa(train_dataset,CONFIG,qf_50_loader,test1_loader,base2_loader,kd0_5_loade
 
         models.append(model)
 
-    # 根据准确率计算权重
     weights = torch.tensor(accuracies) / sum(accuracies)
-    # print(weights)
 
-    # 对测试数据进行预测
-    # X_train, X_test, y_train, y_test = train_test_split(X.numpy(), y.numpy(), test_size=0.3)
-    # X_test = torch.tensor(X_test, dtype=torch.float32)
-    # predicted = aggregate_predictions(models, X_test, weights)
-    # print("Initial Accuracy:", accuracy_score(y_test, predicted.numpy()))
-
-    # 假设我们需要遗忘第一个片段的数据
-    # indices_to_forget = shards[0][:10]
-    # print(shards[0])
-    # member_gt = [1 for i in range(1000)]
     member_gt = [1 for i in range(100)]
     _t, pv, EMA_res, risk_score = api_sisa(device, models, weights, qf_50_loader, member_gt, cal_100_loader, caltest1_loader)
     print("EMA_res:", EMA_res, "risk_score:", risk_score, "pvalue:", pv)
-    # 更新shards[0]，排除需要遗忘的数据
     # shards[0] = np.setdiff1d(shards[0], indices_to_forget)
     forget_set = set(CONFIG['QF_100']['QUERY'])
     # forget_set = set(CONFIG['QF_100']['QUERY'])
@@ -1567,12 +1276,7 @@ def sisa(train_dataset,CONFIG,qf_50_loader,test1_loader,base2_loader,kd0_5_loade
         updated_shard = list(shard_set - forget_set)
         updated_shards.append(updated_shard)
     updated_shards = adjust_shards(updated_shards)
-    # 使用更新后的shards[0]重新训练模型
-    # for i, shard in enumerate(updated_shards):
-    #     print(f"Length of shard {i + 1}: {len(shard)}")
-    # dataset_forgotten = TensorDataset(X_train_forgotten, y_train_forgotten)
-    # loader_forgotten = DataLoader(dataset_forgotten, batch_size=5, shuffle=True)
-    # model = SimpleNN()
+
     optimizer = optim.Adam(model.parameters(), lr=0.001)
     model.train()
     for i, shard in enumerate(updated_shards):
@@ -1620,19 +1324,19 @@ def sisa(train_dataset,CONFIG,qf_50_loader,test1_loader,base2_loader,kd0_5_loade
                 # print(predicted)
                 # print(labels.size(0))
                 totaltt += labels.size(0)
-                labels = labels.squeeze()  # 在path中使用
+                labels = labels.squeeze()  # 
                 # print((predicted == labels).sum().item())
                 # correcttt = (predicted == labels).sum().item()
-                correcttt += (predicted == labels).sum().item()  # 计算 mnist 数据集的时候就没有问题
+                correcttt += (predicted == labels).sum().item()  
 
         all_labels_np = np.array(all_labels)
         all_preds_np = np.array(all_preds)
 
         # 计算混淆矩阵
         conf_matrix = confusion_matrix(all_labels_np, all_preds_np)
-        TP = conf_matrix[1, 1]  # 真正例
-        FP = conf_matrix[0, 1]  # 假正例
-        FN = conf_matrix[1, 0]  # 假负例
+        TP = conf_matrix[1, 1]  # 
+        FP = conf_matrix[0, 1]  # 
+        FN = conf_matrix[1, 0]  # 
         f1 = 2 * TP / (2 * TP + FP + FN)
         # f1_macro = f1_score(all_labels_np, all_preds_np, average='macro')
         precision, recall, f1_score, _ = precision_recall_fscore_support(all_labels, all_preds, average='weighted')
@@ -1650,7 +1354,6 @@ def sisa(train_dataset,CONFIG,qf_50_loader,test1_loader,base2_loader,kd0_5_loade
     # 根据准确率计算权重
     weights = torch.tensor(accuracies) / sum(accuracies)
     weights = weights.to(device)
-    # 重新评估第一个模型的准确率
     # model.eval()
     # with torch.no_grad():
     #     predictions = model(X_train_forgotten).max(1)[1]
@@ -1711,14 +1414,13 @@ def testk(model, test_loader, device):
         with torch.no_grad():
             for X, Y in test_loader:
                 X, Y = X.to(device), Y.to(device)
-                Y = Y.squeeze()  # 在path中使用
+                Y = Y.squeeze()  # 
 
                 outputs = model(X)
                 _, predicted = torch.max(outputs.data, 1)
                 total += Y.size(0)
                 correct += (predicted == Y).sum().item()
 
-                # 将预测值和真实标签保存起来，用于计算 F1 score
                 all_preds.extend(predicted.cpu().numpy())
                 all_labels.extend(Y.cpu().numpy())
 
@@ -1726,18 +1428,18 @@ def testk(model, test_loader, device):
         all_labels_np = np.array(all_labels)
         all_preds_np = np.array(all_preds)
 
-        # 计算混淆矩阵
+        # 
         conf_matrix = confusion_matrix(all_labels_np, all_preds_np)
-        # TP = conf_matrix[1, 1]  # 真正例
-        # FP = conf_matrix[0, 1]  # 假正例
-        # FN = conf_matrix[1, 0]  # 假负例
-        TP = conf_matrix[1, 1]  # 真正例
-        TN = conf_matrix[0, 0]  # 真负例
-        FP = conf_matrix[0, 1]  # 假正例
-        FN = conf_matrix[1, 0]  # 假负例
+        # TP = conf_matrix[1, 1]  # 
+        # FP = conf_matrix[0, 1]  # 
+        # FN = conf_matrix[1, 0]  # 
+        TP = conf_matrix[1, 1]  # 
+        TN = conf_matrix[0, 0]  # 
+        FP = conf_matrix[0, 1]  # 
+        FN = conf_matrix[1, 0]  # 
         # f1 = 2 * TP / (2 * TP + FP + FN)
         # accuracy = (TP + TN) / (TP + TN + FP + FN)
-        # 计算 F1 score（宏平均）
+        # 
         f1 = f1_score(all_labels, all_preds, average='macro')
 
         return accuracy, f1
@@ -1745,9 +1447,9 @@ def initialize_last_n_layers(model, n=10):
         layers = list(model.modules())
         for layer in layers[-n:]:
             if isinstance(layer, nn.Linear):
-                nn.init.xavier_normal_(layer.weight)  # 使用 Xavier 初始化
+                nn.init.xavier_normal_(layer.weight)  # 
                 if layer.bias is not None:
-                    nn.init.constant_(layer.bias, 0)  # 偏置初始化为0
+                    nn.init.constant_(layer.bias, 0)  # 
             elif isinstance(layer, nn.Conv2d):
                 nn.init.kaiming_normal_(layer.weight, mode='fan_out', nonlinearity='relu')
                 if layer.bias is not None:
@@ -1757,22 +1459,7 @@ def euk(train_dataset, CONFIG,best_model_state_trained,base2_loader,test1_loader
     modelmlp = get_student_model().to(device)
     modelmlp.load_state_dict(best_model_state_trained)
 
-    # def initialize_weights(model):
-    #     for m in model.modules():
-    #         if isinstance(m, nn.Linear):
-    #             nn.init.kaiming_uniform_(m.weight)  # 使用 He 初始化方法
-    #             if m.bias is not None:
-    #                 nn.init.constant_(m.bias, 0)  # 将偏置初始化为0
-    #         elif isinstance(m, nn.LogSoftmax):
-    #             pass  # LogSoftmax 不需要初始化
-    # def initialize_weights(model):
-    #     for m in model.modules():
-    #         if isinstance(m, nn.Linear):
-    #             nn.init.xavier_normal_(m.weight)  # 使用 Xavier 初始化方法（正态分布）
-    #             if m.bias is not None:
-    #                 nn.init.constant_(m.bias, 0)  # 将偏置初始化为0
-    #         elif isinstance(m, nn.LogSoftmax):
-    #             pass  # LogSoftmax 不需要初始化
+
     import torch.nn as nn
 
     def freeze_first_n_layers(model, n=8):
@@ -1782,51 +1469,41 @@ def euk(train_dataset, CONFIG,best_model_state_trained,base2_loader,test1_loader
                 param.requires_grad = False
 
 
-    # 冻结前8层
     # freeze_first_n_layers(modelmlp, n=8)
 
-    # 初始化最后10层
     initialize_last_n_layers(modelmlp, n=10)
 
-    # 初始化分类器的所有层
     # initialize_weights(modelmlp.classifier)
 
     # u = modelmlp.state_dict()
-    # 重新初始化最后一层分类器
     # modelmlp.classifier.network[0] = nn.Linear(256, 2).to(device)
     # modelmlp.classifier.network[1] = nn.LogSoftmax(dim=-1).to(device)
 
-    # 冻结特征提取器的所有层
     # for param in modelmlp.feature_extractor.parameters():
     #     param.requires_grad = False
 
-    # 定义损失函数和优化器
     criterion = nn.CrossEntropyLoss()
     import torch.optim as optim
     import torch.nn as nn
 
-    # 冻结模型的所有参数
+    
     for param in modelmlp.parameters():
         param.requires_grad = False
 
-    # 获取模型的所有层
     layers = list(modelmlp.children())  # 或 list(modelmlp.modules())，具体视模型结构而定
 
-    # 解冻最后十层的参数
-    last_layers = layers[-10:]  # 获取最后十层
+    last_layers = layers[-10:]  
     params_to_optimize = []
     for layer in last_layers:
         for param in layer.parameters():
             param.requires_grad = True
             params_to_optimize.append(param)
 
-    # 使用 Adam 优化器，仅优化最后十层的参数
     optimizer = optim.Adam(params_to_optimize, lr=0.001)
 
     # criterion = nn.NLLLoss()
     # optimizer = optim.Adam(modelmlp.classifier.parameters(), lr=0.01)
 
-    # 训练最后一层
     modelmlp.train()
     num_epochs = 5
     for epoch in range(num_epochs):
@@ -1843,21 +1520,6 @@ def euk(train_dataset, CONFIG,best_model_state_trained,base2_loader,test1_loader
 
             running_loss += loss.item()
         # print(f'Epoch [{epoch + 1}/{num_epochs}], Loss: {running_loss / len(base2_loader)}')
-
-    # 测试重新训练最后一层的模型
-    # def test(model, test_loader, device):
-    #     model.eval()
-    #     correct = 0
-    #     total = 0
-    #     with torch.no_grad():
-    #         for X, Y in test_loader:
-    #             X, Y = X.to(device), Y.to(device)
-    #             outputs = model(X)
-    #             _, predicted = torch.max(outputs.data, 1)
-    #             total += Y.size(0)
-    #             correct += (predicted == Y).sum().item()
-    #     accuracy = 100 * correct / total
-    #     return accuracy
 
 
 
@@ -1884,8 +1546,6 @@ def euk(train_dataset, CONFIG,best_model_state_trained,base2_loader,test1_loader
 
 def cfk(train_dataset, CONFIG,best_model_state_trained,base2_loader,test1_loader,qf_100_loader, cal_1000_loader, caltest1_loader,device,kd0_5_loader_no):
 
-    # 微调最后一层
-    # 这里我们仅微调最后一层，所以不解冻特征提取器层
     modelmlp2 =get_student_model().to(device)
     criterion2 = nn.CrossEntropyLoss()
 
@@ -1899,18 +1559,15 @@ def cfk(train_dataset, CONFIG,best_model_state_trained,base2_loader,test1_loader
     for param in modelmlp2.parameters():
         param.requires_grad = False
 
-        # 获取模型的所有层
-    layers = list(modelmlp2.children())  # 或 list(modelmlp.modules())，具体视模型结构而定
+    layers = list(modelmlp2.children())  
 
-    # 解冻最后十层的参数
-    last_layers = layers[-10:]  # 获取最后十层
+    last_layers = layers[-10:]  
     params_to_optimize = []
     for layer in last_layers:
         for param in layer.parameters():
             param.requires_grad = True
             params_to_optimize.append(param)
 
-    # 使用 Adam 优化器，仅优化最后十层的参数
     optimizer2 = optim.Adam(params_to_optimize, lr=0.001)
 
     modelmlp2.train()
@@ -1929,7 +1586,6 @@ def cfk(train_dataset, CONFIG,best_model_state_trained,base2_loader,test1_loader
 
             running_loss += loss.item()
         # print(f'Epoch [{epoch + 1}/{num_epochs}], Loss: {running_loss / len(base2_loader)}')
-    # 测试微调后的模型
     accuracy_finetuned = testk(modelmlp2, test1_loader, device)
     print(f'Finetuned Classifier Test Accuracy: {accuracy_finetuned}%')
     logger.info(f'Finetuned Classifier Test Accuracy: {accuracy_finetuned}%')

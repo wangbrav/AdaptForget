@@ -15,9 +15,7 @@ from torch.nn.functional import softmax
 metrics = ['correctness', 'confidence', 'entropy']
 def aggregate_predictions(models, X_test, weights):
     with torch.no_grad():
-        # 使用加权平均合并模型的 logits
         weighted_logits = sum(weight * model(X_test) for model, weight in zip(models, weights))
-        # 计算最终的概率分布
         # probabilities = softmax(weighted_logits, dim=1)
         # print(probabilities)
         # final_prediction = probabilities.max(1)[1]
@@ -64,17 +62,16 @@ def api_sisa(device, models,weights,qf_100_loader, member_gt, cal_1000_loader, c
             out_Y = aggregate_predictions(models, X, weights)
             # print(out_Y)
             # out_Y = torch.exp(smodel18(X))  #mnist autism
-            Y = Y.squeeze().long()  # pathmnist
+            Y = Y.squeeze().long()  # 
 
             queryPred.append(out_Y)
             queryY.append(Y)
-            # queryY = [item.unsqueeze(0) for item in queryY]# zhishiyongyu dange yangben de yiwagn
+            # queryY = [item.unsqueeze(0) for item in queryY]
 
     # print(queryPred)
-    queryY = torch.cat(queryY).detach().cpu().numpy()  # 这里进行了更改 加上了 unsqueeze(0)
+    queryY = torch.cat(queryY).detach().cpu().numpy()  # 
     queryPred = torch.cat(queryPred).detach().cpu().numpy()
 
-    # then， get calibration set output
     with torch.no_grad():
         for X, Y in calTrainDataLoader:
             X = X.to(device)

@@ -1,5 +1,4 @@
 from __future__ import print_function
-#首先是数据集的加载 加载包括   有一个文件的加载  dataset的嘞也需要 还有一个是dataloader的加载  还有他的config  以及他的颜色扩充通道  以及其的加噪函数  transform  种子的设置
 import sys
 sys.path.append('/root/autodl-tmp/wangbin/yiwang')
 import copy
@@ -49,8 +48,6 @@ from torchvision import datasets, transforms
 # from tsne_mnist_tuo import tsne
 from tsne_mnist_guding1 import tsnet
 # from tsne_mnist_guding2 import tsnes
-# 相比上一个  更改了 数据集的划分方法
-# TODO xiangbi shangyige  zengjia le  afs
 from qf1kosiam import analyze_sample_similarity
 
 from calculate_kl_divergence import calculate_kl_divergence
@@ -101,8 +98,6 @@ import datasets
 import conf
 from training_utils import *
 logging.basicConfig(filename='./tc/training_log_qf1circulate_asdv7.log', level=logging.INFO, format='%(asctime)s %(message)s')
-# logging.basicConfig(filename='./tc/pathablation.log', level=logging.INFO, format='%(asctime)s %(message)s')
-# logging.basicConfig(filename='./tc/pathtsne.log', level=logging.INFO, format='%(asctime)s %(message)s')
 logger = logging.getLogger()
 
 
@@ -131,7 +126,7 @@ def adaptforget(lambda_domain,lambda_risk,lambda_kd,train_dataset,num_epochsall,
     # best_accuracy = 0.0
 
     for epoch in range(num_epochsall):
-        start_time = time.time()  # 记录 epoch 开始时间
+        start_time = time.time()  
         print(f"Epoch {epoch} starting...")
         logger.info(f"Epoch {epoch} starting...")
 
@@ -167,9 +162,7 @@ def adaptforget(lambda_domain,lambda_risk,lambda_kd,train_dataset,num_epochsall,
 
         # print(f'Test value: {_t}, p-value: {pv}, EMA: {EMA_res}, Risk score: {risk_score}')
 
-        """
-        如果需要在对抗部分执行代码，可以在此处解除注释
-        """
+
         f_u = domainadaptation(f_u, c_u, qf_100_loader, kd0_5_loader_no,lambda_domain)
         # f_u = domainadaptation(f_u, c_u, qf_100_loader, kd0_5_loader_no)
         smodelmlp1.load_state_dict(u)
@@ -203,8 +196,8 @@ def adaptforget(lambda_domain,lambda_risk,lambda_kd,train_dataset,num_epochsall,
         print(f'ad test value: {_t}, p_value: {pv}, ema: {EMA_res}, risk_score: {risk_score}')
         # print(f'ad test value: {_t}, p_value: {pv}, ema: {EMA_res}, risk_score: {risk_score}')
         logger.info(f'ad test value: {_t}, p_value: {pv}, ema: {EMA_res}, risk_score: {risk_score}')
-        # 记录 epoch 结束时间
+  
         end_time = time.time()
-        epoch_duration = end_time - start_time  # 计算时间差
+        epoch_duration = end_time - start_time 
         print(f"Epoch {epoch} completed in {epoch_duration:.2f} seconds.")
         logger.info(f"Epoch {epoch} completed in {epoch_duration:.2f} seconds.")

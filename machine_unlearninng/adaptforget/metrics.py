@@ -14,7 +14,6 @@ def JSDiv(p, q):
     return 0.5 * F.kl_div(torch.log(p), m) + 0.5 * F.kl_div(torch.log(q), m)
 
 
-# ZRF/UnLearningScore https://arxiv.org/abs/2205.08096
 def UnLearningScore(tmodel, gold_model, forget_dl, batch_size, device):
     model_preds = []
     gold_model_preds = []
