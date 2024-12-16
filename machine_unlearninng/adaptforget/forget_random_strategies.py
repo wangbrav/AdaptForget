@@ -230,7 +230,6 @@ def blindspot(
     **kwargs,
 ):
     student_model = deepcopy(model)
-    #修改1000的时候这里也要进行修改
     # base2_indices = CONFIG['BASE2']['BASE']
     base2_indices = CONFIG['BASE2']['BASE']
     # base2_dataset = Subset(train_dataset, base2_indices)
@@ -338,14 +337,12 @@ def amnesiac(
     qf_100_indices = filter_dataset_by_label(qf_100_dataset, unlearninglabels)
     qf_100_subset = Subset(qf_100_dataset, qf_100_indices)
 
-    # 处理 base2_dataset（假设我们要使用所有数据）
-    base2_indices = range(len(base2_dataset))  # 使用所有索引
+    base2_indices = range(len(base2_dataset))  #
     base2_subset = Subset(base2_dataset, base2_indices)
 
-    # 将两个子集合并起来
+    #
     unlearning_trainset = ConcatDataset([qf_100_subset, base2_subset])
 
-    # 创建新的 PathMNISTDataset 实例
 
     unlearning_train_set_dl = DataLoader(
         unlearning_trainset, 128, pin_memory=True, shuffle=True
@@ -357,7 +354,7 @@ def amnesiac(
     history, u = fit_one_unlearning_cycle(
         3, model1, unlearning_train_set_dl, retain_valid_dl, device=device, lr=0.01
     )
-    #改变其epoch回事其准确率变高
+    #
     # _ = fit_one_unlearning_cycle(
     #     2, model, unlearning_train_set_dl, retain_valid_dl, device=device, lr=0.0001
     # )
@@ -532,7 +529,7 @@ def ssd_tuning(
     optimizer = torch.optim.SGD(model1.parameters(),  lr=0.001)
 
     # ssd = ssd.ParameterPerturber(model, optimizer, device, parameters)
-    # 创建实例
+    # 
     ssd_instance = ParameterPerturber(model1, optimizer, device, parameters)
     model1= model1.eval()
 
