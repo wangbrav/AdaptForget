@@ -52,16 +52,16 @@ def api(device, smodel18,u,f_u,qf_100_loader, member_gt, cal_1000_loader,caltest
         for X, Y in queryTestDataLoader:
             X = X.to(device)
             Y = Y.to(device)
-            Y = Y.squeeze().long()  # pathmnist
-            out_Y = torch.exp(F.log_softmax(smodel18(X), dim=-1)) #path mnist
-            # out_Y = torch.exp(smodel18(X))  #mnist autism
+            Y = Y.squeeze().long() 
+            out_Y = torch.exp(F.log_softmax(smodel18(X), dim=-1))
+            # out_Y = torch.exp(smodel18(X)) 
 
             queryPred.append(out_Y)
             queryY.append(Y)
-            # queryY = [item.unsqueeze(0) for item in queryY]# zhishiyongyu dange yangben de yiwagn
+            # queryY = [item.unsqueeze(0) for item in queryY]
 
 
-    queryY = torch.cat(queryY).detach().cpu().numpy()  # 这里进行了更改 加上了 unsqueeze(0)
+    queryY = torch.cat(queryY).detach().cpu().numpy() 
     queryPred = torch.cat(queryPred).detach().cpu().numpy()
 
     # then， get calibration set output
@@ -69,9 +69,9 @@ def api(device, smodel18,u,f_u,qf_100_loader, member_gt, cal_1000_loader,caltest
         for X, Y in calTrainDataLoader:
             X = X.to(device)
             Y = Y.to(device)
-            Y = Y.squeeze().long()  # pathmnist
-            out_Y = torch.exp(F.log_softmax(smodel18(X), dim=-1))  # path mnist
-            # out_Y = torch.exp(smodel18(X)) # mnist
+            Y = Y.squeeze().long()  
+            out_Y = torch.exp(F.log_softmax(smodel18(X), dim=-1))  
+            # out_Y = torch.exp(smodel18(X)) 
             calTrainPred.append(out_Y)
             calTrainY.append(Y)
     calTrainY = torch.cat(calTrainY).detach().cpu().numpy()
@@ -81,10 +81,10 @@ def api(device, smodel18,u,f_u,qf_100_loader, member_gt, cal_1000_loader,caltest
         for X, Y in calTestnDataLoader:
             X = X.to(device)
             Y = Y.to(device)
-            Y = Y.squeeze().long()  # pathmnist
-            out_Y = torch.exp(F.log_softmax(smodel18(X), dim=-1))  # path mnist
+            Y = Y.squeeze().long()  # 
+            out_Y = torch.exp(F.log_softmax(smodel18(X), dim=-1))  #
 
-            # out_Y = torch.exp(smodel18(X))  # mnist
+            # out_Y = torch.exp(smodel18(X))  
 
             calTestPred.append(out_Y)
             calTestY.append(Y)

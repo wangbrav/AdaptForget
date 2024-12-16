@@ -54,7 +54,7 @@ class Classifier(nn.Module):
         self.fc = nn.Sequential(
             nn.Linear(64 * 4 * 4, hidden),
             nn.ReLU(),
-            nn.Linear(hidden, hidden),  #后续添加的
+            nn.Linear(hidden, hidden),  
             nn.ReLU(),
             nn.Linear(hidden, num_classes),
             nn.LogSoftmax(dim=-1)
@@ -92,4 +92,3 @@ def get_teacher_model():
 def get_student_model():
     # return Net(3,128,5)
     return Net(3,128,9)
-f'推理100个样本占用的GPU内存: {memory_allocated:.2f} MB')

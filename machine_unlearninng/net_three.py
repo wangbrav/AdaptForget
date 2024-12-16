@@ -52,7 +52,7 @@ class Classifier(nn.Module):
         self.fc = nn.Sequential(
             nn.Linear(64 * 4 * 4, hidden),
             nn.ReLU(),
-            nn.Linear(hidden, hidden),  # 后续添加的
+            nn.Linear(hidden, hidden),
             nn.ReLU(),
             nn.Linear(hidden, num_classes),
             nn.LogSoftmax(dim=-1)

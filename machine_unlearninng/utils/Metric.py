@@ -82,4 +82,3 @@ def Performance(predict, y_test):
     except Exception:
         pass
     return [tp, tn, fp, fn, tpr, tnr, fpr, acc, mcc, fdr, f1]
-    #return [tp, tn, fp, fn, tpr, tnr, fpr, acc, mcc, fdr, f1, tp_idx, tn_idx, fp_idx, fn_idx]

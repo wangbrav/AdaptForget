@@ -28,7 +28,6 @@ def domainadaptation(f_u,weights, forget_loader,test_loader):
 
     n_epoch = 3
 
-    # 表格数据这里需要修改
     feature_extractor = FeatureExtractor(dim_in=20, dim_hidden=64)
     feature_extractor.to(device)
     classifier = Classifier(dim_hidden=64, dim_out=2)

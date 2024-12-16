@@ -68,13 +68,10 @@ def naive_train(args, model, device, train_loader, optimizer, epoch):
         tensor11 = torch.randn(1, 1)
         # print("target.size():", target.size())
         if target.size() == tensor11.size():
-            # 如果是标量，增加一个维度并转换为 long 类型
             target = target.squeeze(0).long()
 
-            # print(clabels.dim())
         else:
-            # 如果不是标量，仅转换类型为 long
-            target = target.squeeze().long()  # 注意，这里的 squeeze 实际上不会改变形状
+            target = target.squeeze().long()  
         loss = -CE(output, target)
         loss.backward()
         optimizer.step()
@@ -145,18 +142,17 @@ def testins(model, device, test_loader):
         for data, target in test_loader:
             data, target = data.to(device), target.to(device)
             output = model(data)
-            # target = target.squeeze().long() # 是path的
+            
             tensor11 = torch.randn(1, 1)
             # print("target.size():", target.size())
             if target.size() == tensor11.size():
-            #     如果是标量，增加一个维度并转换为 long 类型
                 target = target.squeeze(0).long()
 
             else:
                 target = target.squeeze().long()  
             # target = target.long()
             # test_loss += CE(output, target).item() 
-            pred = output.argmax(dim=1, keepdim=True).squeeze(1)  # get the index of the max log-probability
+            pred = output.argmax(dim=1, keepdim=True).squeeze(1) 
             correct += pred.eq(target).sum().item()
             total_pred.extend(pred.cpu().numpy())
             if target.ndim == 0:
@@ -166,7 +162,7 @@ def testins(model, device, test_loader):
             else:
                 total_target.extend(target.cpu().numpy())           
 
-    f1 = f1_score(total_target, total_pred, average='macro')  # Calculate macro F1 score
+    f1 = f1_score(total_target, total_pred, average='macro')  
 
     return test_loss, 100. * correct / len(test_loader.dataset), f1
 

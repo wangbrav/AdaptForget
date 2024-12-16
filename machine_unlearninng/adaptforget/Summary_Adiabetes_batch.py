@@ -1,5 +1,4 @@
 from __future__ import print_function
-#首先是数据集的加载 加载包括   有一个文件的加载  dataset的嘞也需要 还有一个是dataloader的加载  还有他的config  以及他的颜色扩充通道  以及其的加噪函数  transform  种子的设置
 import sys
 sys.path.append('/root/autodl-tmp/wangbin/yiwang')
 import copy
@@ -25,7 +24,7 @@ from qf1kosiam import  analyze_sample_similarity
 from qf1kosiam import analyze_sample_similarity
 
 from calculate_kl_divergence import calculate_kl_divergence
-global epochs  # Epoch编号
+global epochs
 # import utils.Purification
 import argparse
 import torch.nn as nn
@@ -70,14 +69,10 @@ from torchvision import datasets, transforms
 # from tsne_mnist_tuo import tsne
 from tsne_mnist_guding1 import tsnet
 from tsne_mnist_guding2 import tsnes
-# 相比上一个  更改了 数据集的划分方法
-# TODO xiangbi shangyige  zengjia le  afs
 from qf1kosiam import analyze_sample_similarity
 
 from calculate_kl_divergence import calculate_kl_divergence
-# 加载npz文件
 import torch.nn.init as init
-#   afs
 from copy import deepcopy
 
 import matplotlib.pyplot as plt
@@ -129,31 +124,23 @@ from utils_w import *
 from utils_ww import *
 # from Dataset import DataModule, CONFIG
 # from Model import get_teacher_model, get_student_model
-# 设置日志记录 循环
 logging.basicConfig(filename='./tc/training_log_qf1circulate_diabetesv3.log', level=logging.INFO, format='%(asctime)s %(message)s')
 logger = logging.getLogger()
 # class TableDataset(Dataset):
 #     def __init__(self, csv_file, transform=None, shuffle=True, seed=32):
 #         self.data_frame = pd.read_csv(csv_file)
 #
-#         # 如果启用随机化
 #         if shuffle:
-#             # 设置随机种子
 #             np.random.seed(seed)
-#             # 打乱数据框的索引
 #             shuffled_indices = np.random.permutation(self.data_frame.index)
 #             self.data_frame = self.data_frame.loc[shuffled_indices].reset_index(drop=True)
-#
 #         self.transform = transform
-#
 #     def __len__(self):
 #         return len(self.data_frame)
-#
 #     def __getitem__(self, idx):
 #         if torch.is_tensor(idx):
 #             idx = idx.tolist()
-#
-#         features = self.data_frame.iloc[idx, 1:-1].astype(np.float32).values  # 假设所有特征都是数值型
+#         features = self.data_frame.iloc[idx, 1:-1].astype(np.float32).values
 #         labels = self.data_frame.iloc[idx, -1].astype(np.int64)
 #
 #         if self.transform:
@@ -161,21 +148,12 @@ logger = logging.getLogger()
 #
 #         return torch.tensor(features, dtype=torch.float32), torch.tensor(labels, dtype=torch.int64)
 
-#这里需要更改gt的大小
-
-# 定义标准化转换
-
 
 def transform(features):
-    # 目前这里就简单的归一化处理，可以改
     return (features - features.mean()) / features.std()
-
-# 定义添加噪声的转换
 def transform_no(features):
-    # 在原始数据的每一个特征值上随意赋值0-10的随机数值
     noise = np.random.randint(0, 11, size=features.shape)
     return features + noise
-
 def weights_init(m):
     if isinstance(m, nn.Conv2d) or isinstance(m, nn.Linear):
         torch.nn.init.kaiming_uniform_(m.weight)
@@ -601,31 +579,23 @@ def weights_init(m):
 #     stat = Performance(total_pred, total_y)
 #
 #     return test_acc, stat
-# # 检查GPU是否可用
 class TableDataset(Dataset):
     # def __init__(self, csv_file, transform=None, shuffle=True, seed=32):
     # def __init__(self, csv_file, transform=None, shuffle=True, seed=62):
     def __init__(self, csv_file, transform=None, shuffle=True, seed=82):
         self.data_frame = pd.read_csv(csv_file)
 
-        # 如果启用随机化
         if shuffle:
-            # 设置随机种子
             np.random.seed(seed)
-            # 打乱数据框的索引
             shuffled_indices = np.random.permutation(self.data_frame.index)
             self.data_frame = self.data_frame.loc[shuffled_indices].reset_index(drop=True)
-
         self.transform = transform
-
     def __len__(self):
         return len(self.data_frame)
-
     def __getitem__(self, idx):
         if torch.is_tensor(idx):
             idx = idx.tolist()
-
-        features = self.data_frame.iloc[idx, 1:-1].astype(np.float32).values  # 假设所有特征都是数值型
+        features = self.data_frame.iloc[idx, 1:-1].astype(np.float32).values  
         labels = self.data_frame.iloc[idx, -1].astype(np.int64)
 
         if self.transform:
@@ -634,7 +604,6 @@ class TableDataset(Dataset):
         return torch.tensor(features, dtype=torch.float32), torch.tensor(labels, dtype=torch.int64)
 
     def get_labels(self, indices):
-        # 直接从数据框中提取指定索引的标签
         return self.data_frame.iloc[indices, -1].astype(np.int64).tolist()
 device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
 
@@ -714,11 +683,8 @@ CONFIG = {
 }
 
 # class ExpandToRGB:
-#     """将单通道Tensor图像扩展为三通道"""
 #     def __call__(self, tensor):
-#         # 检查是否为单通道图像（形状为 [1, H, W]）
 #         if tensor.shape[0] == 1:
-#             # 重复通道以形成3通道图像
 #             tensor = tensor.repeat(3, 1, 1)
 #         return tensor
 
@@ -729,13 +695,13 @@ CONFIG = {
 
 
 
-csv_file = '/root/autodl-tmp/wangbin/yiwang/data/diabetes_binary_train.csv' # 数据集路径
+csv_file = '/root/autodl-tmp/wangbin/yiwang/data/diabetes_binary_train.csv'
 
-# csv_file = '/mnt/f/BaiduNetdiskDownload/yiwang/data/final.csv' # 数据集路径
+# csv_file = '/mnt/f/BaiduNetdiskDownload/yiwang/data/final.csv'
 train_dataset = TableDataset(csv_file=csv_file, transform=transform)
 train_dataset_no = TableDataset(csv_file=csv_file, transform=transform_no)
 test_dataset = TableDataset(csv_file=csv_file, transform=transform)
-# train_dataset.shuffle_data()  # 使用固定种子打乱数据
+# train_dataset.shuffle_data()
 # train_dataset_no.shuffle_data()
 
 base1_indices = CONFIG['BASE1']['BASE']
@@ -781,10 +747,9 @@ kd0_25_loader = DataLoader(Subset(train_dataset, CONFIG['KD0.25']['BASE']), batc
 kd0_5_loader_no = DataLoader(Subset(train_dataset_no, CONFIG['KD0.5']['BASE']), batch_size=32, shuffle=True,
                           generator=torch.Generator().manual_seed(random_seed))
 
-# feature_extractorteacherv1 = FeatureExtractor(dim_in=24, dim_hidden=256)  # 注意这里的要调整为适应于表格数据的dim_in=8，dim_out=2，可以改
+# feature_extractorteacherv1 = FeatureExtractor(dim_in=24, dim_hidden=256)  
 # classifierteacherv1 = Classifier(dim_hidden=256, dim_out=2)
 #
-# # 创建组合模型实例
 # tmodelmlp = CombinedModel(feature_extractorteacherv1, classifierteacherv1).to(device)
 # feature_extractorstudentv1 = FeatureExtractor(dim_in=24, dim_hidden=64)
 # classifierstudentv1 = Classifier(dim_hidden=64, dim_out=2)
@@ -808,9 +773,6 @@ model_s =get_student_model().to(device)
 
 
 
-"""
-进行重训模型
-"""
 # 其余的代码保持不变
 # 参数设置
 epochs =30
@@ -831,10 +793,8 @@ best_model_state_strained = None
 
 criterion = nn.CrossEntropyLoss()
 optimizer = torch.optim.Adam(model.parameters(), lr=learning_rate)
-# 狗屎王斌的错
 # optimizer_strained = torch.optim.Adam(model.parameters(), lr=learning_rate)
 optimizer_strained = torch.optim.Adam(model_strained.parameters(), lr=learning_rate)
-#狗屎wushenjign是狗屎
 optimizer_s = torch.optim.Adam(model_s.parameters(), lr=learning_rate)
 # #
 # for epoch in range(epochs):
@@ -903,8 +863,8 @@ optimizer_s = torch.optim.Adam(model_s.parameters(), lr=learning_rate)
 #             optimizer.zero_grad()
 #             output = model(X)
 #             # print(output)
-#             # output = torch.argmax(output, dim=1)  # 假设Y是独热编码，转换成类别索引
-#             # print(output.shape)  # 检查Y的形状
+#             # output = torch.argmax(output, dim=1)  #
+#             # print(output.shape)  
 #             # print(output)
 #             # print(Y.shape)
 #             # print(Y)

@@ -234,10 +234,7 @@ class mia(object):
             res.append(acc_ment)
             if acc_ment > best_acc:
                 best_acc = acc_ment
-        ## TODO: add API for NN attacks
-        # if (all_methods) or ('NN' in benchmark_methods):
-        #     print('To be implemented')
-        #     acc_NN = self._mem_inf_NN(args)
+
 
         print(f'Best attack acc: {best_acc}')
         res.append(best_acc)
@@ -275,7 +272,6 @@ class mia_plus(object):
         # self.t_tr_corr = (np.argmax(self.t_tr_outputs, axis=1)==self.t_tr_labels).astype(int)
         # self.t_te_corr = (np.argmax(self.t_te_outputs, axis=1)==self.t_te_labels).astype(int)
         end = time.time()
-        #print(f'>> time cost: {end - start}')
 
         start = time.time()
         self.s_tr_conf = np.array([self.s_tr_outputs[i, self.s_tr_labels[i]] for i in range(len(self.s_tr_labels))])
@@ -284,7 +280,6 @@ class mia_plus(object):
         # self.t_tr_conf = np.array([self.t_tr_outputs[i, self.t_tr_labels[i]] for i in range(len(self.t_tr_labels))])
         # self.t_te_conf = np.array([self.t_te_outputs[i, self.t_te_labels[i]] for i in range(len(self.t_te_labels))])
         end = time.time()
-        #print(f'>> time cost: {end - start}')
 
         # entropy
         start = time.time()

@@ -16,7 +16,6 @@ def calculate_kl_divergence(smodel,u, smodel_base2, data_loader, device):
     for images, _ in data_loader:  
         images = images.to(device)  
 
-        # 进行预测
         output_1 = model_1(images)
         output_2 = model_2(images)
 

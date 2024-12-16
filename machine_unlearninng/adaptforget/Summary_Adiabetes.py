@@ -836,7 +836,7 @@ for qf1_start in range(19910, 19999):
     best_model_state_trained = torch.load('/root/autodl-tmp/wangbin/yiwang/afsandadapt/quanzhong/diabetes/best_trained_test1.pth')
     u11=best_model_state_retrained
     logger.info(f'>>qf1_start: {qf1_start}')
-    qf1_end = qf1_start + 1  # 修改为您希望的大小
+    qf1_end = qf1_start + 1  
     CONFIG['QF1'] = {
         'QUERY': list(range(qf1_start, qf1_end)),
         'QUERY_MEMBER': [1 for _ in range(qf1_end - qf1_start)]
@@ -844,40 +844,37 @@ for qf1_start in range(19910, 19999):
     qf_1_indices = CONFIG['QF1']['QUERY']
     qf_1_dataset = Subset(train_dataset, qf_1_indices)
     qf1_loader = DataLoader(Subset(train_dataset, CONFIG['QF1']['QUERY']), batch_size=32, shuffle=False)
-    # average_euclidean_retrained, average_manhattan_retrained, average_cosine_similarity_retrained = analyze_sample_similarity(
-    #     model_s, u11,
-    #     device,
-    #     train_dataset,
-    #     CONFIG)
-    # print(
-    #     f'>>average_euclidean_retrained: {average_euclidean_retrained}, average_manhattan_retrained: {average_manhattan_retrained}, average_cosine_similarity_retrained: {average_cosine_similarity_retrained}')
-    # logger.info(
-    #     f'>>average_euclidean_retrained: {average_euclidean_retrained}, average_manhattan_retrained: {average_manhattan_retrained}, average_cosine_similarity_retrained: {average_cosine_similarity_retrained}')
-    #
-    # network = 'resnet18'
-    # dataset = 'cifar10'
-    # method = 'ssd_tuning'
-    # classes = 2
-    # train_and_forget(network,kd0_5_loader,test1_loader, best_model_state_strained, best_model_state_retrained, dataset, classes, qf_1_dataset,qf1_loader, base2_dataset, method, gpu=True,train_dataset=train_dataset,CONFIG=CONFIG,cal_1000_loader=cal_100_loader,caltest1_loader=caltest1_loader)
-    # method = 'amnesiac'
-    #
-    # train_and_forget(network,kd0_5_loader,test1_loader, best_model_state_strained, best_model_state_retrained, dataset, classes, qf_1_dataset,qf1_loader, base2_dataset, method, gpu=True,train_dataset=train_dataset,CONFIG=CONFIG,cal_1000_loader=cal_100_loader,caltest1_loader=caltest1_loader)
-    # #
-    # method = 'blindspot'
-    # train_and_forget(network, kd0_5_loader,test1_loader,best_model_state_strained, best_model_state_retrained, dataset, classes, qf_1_dataset,qf1_loader, base2_dataset, method, gpu=True,train_dataset=train_dataset,CONFIG=CONFIG,cal_1000_loader=cal_100_loader,caltest1_loader=caltest1_loader)
-    #
-    # method = 'FisherForgetting'
-    # train_and_forget(network, kd0_5_loader,test1_loader,best_model_state_strained, best_model_state_retrained, dataset, classes, qf_1_dataset,qf1_loader, base2_dataset, method, gpu=True,train_dataset=train_dataset,CONFIG=CONFIG,cal_1000_loader=cal_100_loader,caltest1_loader=caltest1_loader)
-    #
+    average_euclidean_retrained, average_manhattan_retrained, average_cosine_similarity_retrained = analyze_sample_similarity(
+        model_s, u11,
+        device,
+        train_dataset,
+        CONFIG)
+    print(
+        f'>>average_euclidean_retrained: {average_euclidean_retrained}, average_manhattan_retrained: {average_manhattan_retrained}, average_cosine_similarity_retrained: {average_cosine_similarity_retrained}')
+    logger.info(
+        f'>>average_euclidean_retrained: {average_euclidean_retrained}, average_manhattan_retrained: {average_manhattan_retrained}, average_cosine_similarity_retrained: {average_cosine_similarity_retrained}')
 
-    # subset_indices = base1_indices  # 获取 Subset 的索引
-    # train_labels = TableDataset.get_labels(train_dataset, subset_indices)
-    # instance(base1_dataset, base1_indices, test1_loader, best_model_state_retrained, best_model_state_strained,cal_100_loader, caltest1_loader, qf_1_indices,CONFIG,train_labels=train_labels,train_dataset=train_dataset)
+    network = 'resnet18'
+    dataset = 'cifar10'
+    method = 'ssd_tuning'
+    classes = 2
+    train_and_forget(network,kd0_5_loader,test1_loader, best_model_state_strained, best_model_state_retrained, dataset, classes, qf_1_dataset,qf1_loader, base2_dataset, method, gpu=True,train_dataset=train_dataset,CONFIG=CONFIG,cal_1000_loader=cal_100_loader,caltest1_loader=caltest1_loader)
+    method = 'amnesiac'
 
+    train_and_forget(network,kd0_5_loader,test1_loader, best_model_state_strained, best_model_state_retrained, dataset, classes, qf_1_dataset,qf1_loader, base2_dataset, method, gpu=True,train_dataset=train_dataset,CONFIG=CONFIG,cal_1000_loader=cal_100_loader,caltest1_loader=caltest1_loader)
     #
-    # #
+    method = 'blindspot'
+    train_and_forget(network, kd0_5_loader,test1_loader,best_model_state_strained, best_model_state_retrained, dataset, classes, qf_1_dataset,qf1_loader, base2_dataset, method, gpu=True,train_dataset=train_dataset,CONFIG=CONFIG,cal_1000_loader=cal_100_loader,caltest1_loader=caltest1_loader)
+
+    method = 'FisherForgetting'
+    train_and_forget(network, kd0_5_loader,test1_loader,best_model_state_strained, best_model_state_retrained, dataset, classes, qf_1_dataset,qf1_loader, base2_dataset, method, gpu=True,train_dataset=train_dataset,CONFIG=CONFIG,cal_1000_loader=cal_100_loader,caltest1_loader=caltest1_loader)
+
+
+    subset_indices = base1_indices  
+    train_labels = TableDataset.get_labels(train_dataset, subset_indices)
+    instance(base1_dataset, base1_indices, test1_loader, best_model_state_retrained, best_model_state_strained,cal_100_loader, caltest1_loader, qf_1_indices,CONFIG,train_labels=train_labels,train_dataset=train_dataset)
+
     start_time = time.time()
-
     adaptforget(
         lambda_domain=1,
         lambda_risk=1,
@@ -896,7 +893,6 @@ for qf1_start in range(19910, 19999):
         kd0_5_loader_no=kd0_5_loader_no,
         base2_loader=base2_loader,
     )
-    # 结束计时
     end_time = time.time()
     total_time = end_time - start_time
     print(f"The adaptforget function completed in {total_time:.2f} seconds.")
@@ -917,18 +913,3 @@ for qf1_start in range(19910, 19999):
 
 # afs(args,best_model_state_trained)
 # afs(args,best_model_state_trained,base1_loader,base2_loader,test1_loader,cal_1000_loader,caltest1_loader,qf_100_loader,device)
-
-#
-# 写好准备的参数
-
-
-# afs的具体的代码
-
-
-
-
-
-
-# adaptforget的具体的代码
-# 重训的模型也要一起训练
-# 输出对应的模型的时候要保存最佳权重
