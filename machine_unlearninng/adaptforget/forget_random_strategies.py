@@ -1,8 +1,3 @@
-"""
-Refer to forget_full_class_... for comments
-This file is near identical with minimal modifications to facilitate random forgetting.
-Seperate file to allow for easy reuse.
-"""
 
 import random
 import numpy as np
@@ -36,7 +31,7 @@ def filter_dataset_by_label(dataset, unlearninglabels):
         rnd = random.choice(unlearninglabels)
         while rnd == label:
             rnd = random.choice(unlearninglabels)
-        indices.append(idx)  # 只记录与随机标签不同的索引
+        indices.append(idx)
     return indices
 
 def get_metric_scores(
@@ -70,7 +65,6 @@ def get_metric_scores(
     zrf = UnLearningScore(model, unlearning_teacher, forget_valid_dl, 128, device)
     d_f = evaluate(model, forget_valid_dl, device)
     mia = get_membership_attack_prob(retain_train_dl, forget_train_dl, valid_dl, model)
-    #修改1000的时候这里也需要修改
     # member_gt = [1 for i in range(1000)]
     member_gt = [1 for i in range(100)]
     u,f_u =model.state_dict(),model.feature_extractor.state_dict()
@@ -234,7 +228,6 @@ def blindspot(
     base2_indices = CONFIG['BASE2']['BASE']
     # base2_dataset = Subset(train_dataset, base2_indices)
 
-    # 直接从索引中随机采样 30%
     retain_indices = random.sample(base2_indices, int(0.3 * len(base2_indices)))
     KL_temperature = 1
     optimizer = torch.optim.Adam(student_model.parameters(), lr=0.0001)
@@ -318,20 +311,6 @@ def amnesiac(
     # unlearning_trainset = []
 
 
-    # for x, clabel in qf_100_dataset:
-    # # for x, _, clabel in forget_train_dl.dataset:
-    #     rnd = random.choice(unlearninglabels)
-    #     while rnd == clabel:
-    #         rnd = random.choice(unlearninglabels)
-    #     unlearning_trainset.append((x,  rnd))
-    #     # unlearning_trainset.append((x, _, rnd))
-    #     print(unlearning_trainset)
-    #
-    # for x,  y in base2_dataset:
-    # # for x, _, y in retain_train_dl.dataset:
-    #     unlearning_trainset.append((x,  y))
-    #     # unlearning_trainset.append((x, _, y))
-    # 处理 qf_100_dataset
 
 
     qf_100_indices = filter_dataset_by_label(qf_100_dataset, unlearninglabels)
@@ -421,13 +400,9 @@ def FisherForgetting(
             for y in range(output.shape[1]):
                 target = torch.empty_like(orig_target).fill_(y)
                 # target = target.long()
-                target = target.unsqueeze(0)  # 增加一个维度
+                target = target.unsqueeze(0)  # 
 
-                # print(target)
-                # print("Output shape:", output.shape)
-                # print("Output type:", output.dtype)
-                # print("Target shape:", target.shape)
-                # print("Target type:", target.dtype)
+
 
 
 
@@ -529,7 +504,7 @@ def ssd_tuning(
     optimizer = torch.optim.SGD(model1.parameters(),  lr=0.001)
 
     # ssd = ssd.ParameterPerturber(model, optimizer, device, parameters)
-    # 
+    #
     ssd_instance = ParameterPerturber(model1, optimizer, device, parameters)
     model1= model1.eval()
 

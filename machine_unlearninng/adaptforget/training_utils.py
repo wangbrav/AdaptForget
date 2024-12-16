@@ -1,8 +1,3 @@
-""" helper function
-
-author baiyu
-"""
-# https://github.com/weiaicunzai/pytorch-cifar100
 import os
 import sys
 import re

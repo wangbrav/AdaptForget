@@ -112,7 +112,7 @@ def blindspot_unlearner(
         optimizer = optimizer  # (model.parameters())
 
     for epoch in range(epochs):
-        print("Epoch 执行过了{}".format(epoch + 1))
+        print("Epoch Executed{}".format(epoch + 1))
         loss = unlearning_step(
             model=model,
             unlearning_teacher=unlearning_teacher,

@@ -1490,7 +1490,7 @@ def euk(train_dataset, CONFIG,best_model_state_trained,base2_loader,test1_loader
     for param in modelmlp.parameters():
         param.requires_grad = False
 
-    layers = list(modelmlp.children())  # 或 list(modelmlp.modules())，具体视模型结构而定
+    layers = list(modelmlp.children())  # 或 list(modelmlp.modules())，
 
     last_layers = layers[-10:]  
     params_to_optimize = []
@@ -1513,7 +1513,7 @@ def euk(train_dataset, CONFIG,best_model_state_trained,base2_loader,test1_loader
 
             optimizer.zero_grad()
             outputs = modelmlp(inputs)
-            labels = labels.squeeze().long()  # 是path的
+            labels = labels.squeeze().long()  # 
             loss = criterion(outputs, labels)
             loss.backward()
             optimizer.step()
