@@ -928,10 +928,8 @@ model_s =get_student_model().to(device)
 # #
 # criterion = nn.CrossEntropyLoss()
 # # optimizer = torch.optim.Adam(model.parameters(), lr=learning_rate)
-# # # 狗屎王斌的错
 # # # optimizer_strained = torch.optim.Adam(model.parameters(), lr=learning_rate)
 # optimizer_strained = torch.optim.Adam(model_strained.parameters(), lr=learning_rate)
-# # #狗屎wushenjign是狗屎
 # # optimizer_s = torch.optim.Adam(model_s.parameters(), lr=learning_rate)
 #
 # for epoch in range(epochs):

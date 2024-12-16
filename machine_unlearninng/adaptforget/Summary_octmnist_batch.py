@@ -1,5 +1,4 @@
 from __future__ import print_function
-#首先是数据集的加载 加载包括   有一个文件的加载  dataset的嘞也需要 还有一个是dataloader的加载  还有他的config  以及他的颜色扩充通道  以及其的加噪函数  transform  种子的设置
 import sys
 sys.path.append('/root/autodl-tmp/wangbin/yiwang')
 import copy
@@ -45,13 +44,11 @@ from torchvision import datasets, transforms
 # from tsne_mnist_tuo import tsne
 from tsne_mnist_guding1 import tsnet
 from tsne_mnist_guding2 import tsnes
-# 相比上一个  更改了 数据集的划分方法
-# TODO xiangbi shangyige  zengjia le  afs
+
 from qf1kosiam import analyze_sample_similarity
 from utils_w import *
 from utils_ww import *
 from calculate_kl_divergence import calculate_kl_divergence
-# 加载npz文件
 import torch.nn.init as init
 #   afs
 from copy import deepcopy
@@ -99,11 +96,10 @@ import conf
 from training_utils import *
 # from Dataset import DataModule, CONFIG
 # from Model import get_teacher_model, get_student_model
-# 设置日志记录
 logging.basicConfig(filename='training_log_qf1circulate_octmnistfinalv6 (1).log', level=logging.INFO, format='%(asctime)s %(message)s')
 logger = logging.getLogger()
 #
-# #这里需要更改gt的大小
+
 # def afs(args,best_model_state_trained,best_model_state_retrained,base1_loader,base2_loader,test1_loader,cal_1000_loader,caltest1_loader,qf_100_loader,device):
 #     sys.path.append(args.root)
 #     best_model_state_afs = None
@@ -390,7 +386,6 @@ logger = logging.getLogger()
 #                 X, Y = X.to(device), Y.to(device)
 #                 outputs = model(X)
 #                 # _, predicted = torch.max(outputs.data, 1)
-#                   # 调整Y的形状和数据类型
 #
 #                 pred = outputs.data.max(1)[1]
 #                 # print(predicted.shape)
@@ -399,7 +394,7 @@ logger = logging.getLogger()
 #
 #                 Y = Y.squeeze(1).long()
 #                 correct += pred.eq(Y.view(-1)).sum().item()
-#                 # print(f'Batch correct: {(predicted == Y).sum().item()}, Batch total: {Y.size(0)}')  # 新增的打印语句
+#                 # print(f'Batch correct: {(predicted == Y).sum().item()}, Batch total: {Y.size(0)}')
 #     print(f"Correct: {correct}, Total: {total}")
 #     accuracy = 100 * correct / total
 #     return accuracy
@@ -521,7 +516,6 @@ logger = logging.getLogger()
 #     stat = Performance(total_pred, total_y)
 #
 #     return test_acc, stat
-# 检查GPU是否可用
 device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
 print("Using device:", device)
 print("main")
@@ -530,9 +524,7 @@ npz_file_path = '/root/autodl-tmp/wangbin/yiwang/data/octmnist.npz'
 
 data = np.load(npz_file_path)
 
-print(list(data.keys()))  # 打印所有在npz文件中的数组名
 
-# ['train_images', 'val_images', 'test_images', 'train_labels', 'val_labels', 'test_labels']
 images = data['train_images']
 labels = data['train_labels']
 
@@ -564,10 +556,8 @@ class PathMNISTDataset(Dataset):
         return len(self.images)
 
     def __getitem__(self, idx):
-        # 返回当前索引下的图像和标签
         image = self.images[idx]
         label = self.labels[idx]
-        # print(f"Image shape at index {idx}: {image.shape}")
 
         if self.transform:
             image = self.transform(image)
@@ -577,8 +567,7 @@ class PathMNISTDataset(Dataset):
     # def shuffle_data(self, seed=82):
     def shuffle_data(self, seed=62):
     # def shuffle_data(self, seed=32):
-        # 设置随机种子以确保打乱顺序的一致性
-        print(f"Shuffling data with seed {seed}") # 这里的seed是一个局部变量 有没有都可以 做的实验是这样的
+        print(f"Shuffling data with seed {seed}")
         # logger.info(f"Shuffling data with seed {seed}")
 
         np.random.seed(seed)
@@ -586,13 +575,10 @@ class PathMNISTDataset(Dataset):
         np.random.shuffle(indices)
         self.images = self.original_images[indices]
         self.labels = self.original_labels[indices]
-        # 如果提供了转换函数，对每个图像进行转换
         # if self.transform:
-        #     # 逐个图像应用转换
         #     self.images = np.array([self.transform(image) for image in self.images])
 
     def get_labels(self, indices):
-            # 返回指定索引的标签列表
             return [self.labels[i] for i in indices]
 # CONFIG = {
 # 'BASE1': {
@@ -713,44 +699,33 @@ CONFIG = {
 },
 }
 class ExpandToRGB:
-    """将单通道Tensor图像扩展为三通道"""
     def __call__(self, tensor):
-        # 检查是否为单通道图像（形状为 [1, H, W]）
         if tensor.shape[0] == 1:
-            # 重复通道以形成3通道图像
             tensor = tensor.repeat(3, 1, 1)
         return tensor
 def add_salt_and_pepper_noise(img):
-    """
-    向图像添加盐椒噪声
-    img: Tensor图像
-    """
-    # 设定噪声比例
-    amount = 0.1  # 噪声占图像比例
-    # 0.005
-    salt_vs_pepper = 0.5  # 盐和椒的比例
+
+    amount = 0.1
+    salt_vs_pepper = 0.5
     num_salt = np.ceil(amount * img.numel() * salt_vs_pepper)
     num_pepper = np.ceil(amount * img.numel() * (1.0 - salt_vs_pepper))
-
-    # 添加盐噪声
     indices = torch.randperm(img.numel())[:int(num_salt)]
     img.view(-1)[indices] = 1
 
-    # 添加椒噪声
     indices = torch.randperm(img.numel())[:int(num_pepper)]
     img.view(-1)[indices] = 0
 
     return img
 transform = transforms.Compose([
     transforms.ToTensor(),
-    ExpandToRGB(),  # 确保这个转换在ToTensor之后
+    ExpandToRGB(),
 
     transforms.Normalize((0.5, 0.5, 0.5), (0.5, 0.5, 0.5))
 ])
 transform_no_salt_pepper = transforms.Compose([
     # transforms.Grayscale(num_output_channels=3),
     transforms.ToTensor(),
-    ExpandToRGB(),  # 确保这个转换在ToTensor之后
+    ExpandToRGB(),
 
     transforms.Normalize((0.5, 0.5, 0.5), (0.5, 0.5, 0.5)),
     transforms.Lambda(add_salt_and_pepper_noise),
@@ -765,7 +740,7 @@ train_dataset = PathMNISTDataset(images, labels, transform=transform)
 # plot_images_per_class(train_dataset, 9)
 test_dataset = PathMNISTDataset(images_test, labels_test, transform=transform)
 
-train_dataset.shuffle_data()  # 使用固定种子打乱数据
+train_dataset.shuffle_data()
 
 
 train_dataset_no = PathMNISTDataset(images, labels, transform=transform_no_salt_pepper)
@@ -773,32 +748,27 @@ train_dataset_no.shuffle_data()
 # import os
 # import matplotlib.pyplot as plt
 #
-# # 创建保存图片的文件夹
 # output_dir = 'output_images/oct_mnist'
 # if not os.path.exists(output_dir):
 #     os.makedirs(output_dir)
 #
-# # 选择要输出的图片数量
 # num_images_to_save = 10
 
-# 保存图片
 # for i in range(num_images_to_save):
 #     image, label = train_dataset_no[i]
-#     plt.imshow(image.permute(1, 2, 0), cmap='gray')  # 调整图像维度以适应Matplotlib的显示
+#     plt.imshow(image.permute(1, 2, 0), cmap='gray')
 #     plt.title(f'Label: {label}')
 #     plt.axis('off')
-#     plt.savefig(f'{output_dir}/image_{i}.png')  # 保存图片
+#     plt.savefig(f'{output_dir}/image_{i}.png')
 #     plt.close()
 # for i in range(num_images_to_save):
 #     image, label = train_dataset_no[i]
-#     # 如果图像是tensor，可能需要将通道从(C, H, W)转换为(H, W, C)格式
-#     image = image.permute(1, 2, 0)  # 将 (C, H, W) 转换为 (H, W, C) 格式
-#     plt.imshow(image)  # 显示彩色图像
+#     image = image.permute(1, 2, 0)
+#     plt.imshow(image)
 #     plt.title(f'Label: {label}')
 #     plt.axis('off')
-#     plt.savefig(f'{output_dir}/image_{i}.png')  # 保存图片
+#     plt.savefig(f'{output_dir}/image_{i}.png')
 #     plt.close()
-# print(f'已保存 {num_images_to_save} 张彩色图片到 {output_dir} 文件夹中。')
 
 base1_indices = CONFIG['BASE1']['BASE']
 base1_dataset = Subset(train_dataset, base1_indices)
@@ -838,11 +808,9 @@ qno_5000_loader = DataLoader(Subset(train_dataset, CONFIG['QNO_5000']['QUERY']),
 
 qf_100_loader_noise = DataLoader(Subset(train_dataset_no, CONFIG['QF_100']['QUERY']), batch_size=32, shuffle=True,
                                  generator=torch.Generator().manual_seed(random_seed))
-# 创建十个 Subset 的副本
 # subsets = [Subset(train_dataset, CONFIG['QF_100']['QUERY']) for _ in range(10)]
 # concat_dataset = ConcatDataset(subsets)
 #
-# # 使用 ConcatDataset 创建 DataLoader
 # qf_100_loader10 = DataLoader(
 #     concat_dataset,
 #     batch_size=64,
@@ -881,17 +849,10 @@ kd0_75_loader_no = DataLoader(Subset(train_dataset_no, CONFIG['KD0.75']['BASE'])
 model =get_teacher_model().to(device)
 model_strained =get_student_model().to(device)
 model_s =get_student_model().to(device)
-"""
-进行重训模型
 
-"""
-# 其余的代码保持不变
-
-# 参数设置
 epochs =30
 learning_rate = 0.001
 
-# 数据加载和预处理
 
 best_accuracy=0
 best_accuracy_strained=0
@@ -904,10 +865,8 @@ best_model_state_strained = None
 
 criterion = nn.CrossEntropyLoss()
 optimizer = torch.optim.Adam(model.parameters(), lr=learning_rate)
-# 狗屎王斌的错
 # optimizer_strained = torch.optim.Adam(model.parameters(), lr=learning_rate)
 optimizer_strained = torch.optim.Adam(model_strained.parameters(), lr=learning_rate)
-#狗屎wushenjign是狗屎
 optimizer_s = torch.optim.Adam(model_s.parameters(), lr=learning_rate)
 # for epoch in range(epochs):
 #     model_strained.train()
@@ -922,7 +881,7 @@ optimizer_s = torch.optim.Adam(model_s.parameters(), lr=learning_rate)
 #             optimizer_strained.zero_grad()
 #             output = model_strained(X)
 #             # print(output)
-#             # output = torch.argmax(output, dim=1)  # 假设Y是独热编码，转换成类别索引
+#             # output = torch.argmax(output, dim=1)
 #             # print(output.shape)  # 检查Y的形状
 #             # print(output)
 #             # print(Y.shape)
