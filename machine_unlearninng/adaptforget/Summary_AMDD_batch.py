@@ -1,7 +1,5 @@
 from __future__ import print_function
-#首先是数据集的加载 加载包括   有一个文件的加载  dataset的嘞也需要 还有一个是dataloader的加载  还有他的config  以及他的颜色扩充通道  以及其的加噪函数  transform  种子的设置
 import sys
-sys.path.append('/root/autodl-tmp/wangbin/yiwang')
 import copy
 import torch.nn as nn
 import torch
@@ -137,12 +135,8 @@ class TableDataset(Dataset):
     def __init__(self, csv_file, transform=None, shuffle=True, seed=62):
     # def __init__(self, csv_file, transform=None, shuffle=True, seed=32):
         self.data_frame = pd.read_csv(csv_file)
-
-        # 如果启用随机化
         if shuffle:
-            # 设置随机种子
             np.random.seed(seed)
-            # 打乱数据框的索引
             shuffled_indices = np.random.permutation(self.data_frame.index)
             self.data_frame = self.data_frame.loc[shuffled_indices].reset_index(drop=True)
 
@@ -164,19 +158,11 @@ class TableDataset(Dataset):
         return torch.tensor(features, dtype=torch.float32), torch.tensor(labels, dtype=torch.int64)
 
     def get_labels(self, indices):
-        # 直接从数据框中提取指定索引的标签
         return self.data_frame.iloc[indices, -1].astype(np.int64).tolist()
-
-#这里需要更改gt的大小
-
-# 定义标准化转换
 def transform(features):
-    # 目前这里就简单的归一化处理，可以改
     return (features - features.mean()) / features.std()
 
-# 定义添加噪声的转换
 def transform_no(features):
-    # 在原始数据的每一个特征值上随意赋值0-10的随机数值
     noise = np.random.randint(10, 11, size=features.shape)
     return features + noise
 
@@ -689,11 +675,8 @@ CONFIG = {
 }
 
 # class ExpandToRGB:
-#     """将单通道Tensor图像扩展为三通道"""
 #     def __call__(self, tensor):
-#         # 检查是否为单通道图像（形状为 [1, H, W]）
 #         if tensor.shape[0] == 1:
-#             # 重复通道以形成3通道图像
 #             tensor = tensor.repeat(3, 1, 1)
 #         return tensor
 
@@ -709,7 +692,7 @@ csv_file = '/root/autodl-tmp/wangbin/yiwang/data/modified_raw_balanced_dataset.c
 train_dataset = TableDataset(csv_file=csv_file, transform=transform)
 train_dataset_no = TableDataset(csv_file=csv_file, transform=transform_no)
 test_dataset = TableDataset(csv_file=csv_file, transform=transform)
-# train_dataset.shuffle_data()  # 使用固定种子打乱数据
+# train_dataset.shuffle_data()
 # train_dataset_no.shuffle_data()
 
 base1_indices = CONFIG['BASE1']['BASE']
@@ -749,10 +732,9 @@ kd0_25_loader = DataLoader(Subset(train_dataset, CONFIG['KD0.25']['BASE']), batc
 kd0_5_loader_no = DataLoader(Subset(train_dataset_no, CONFIG['KD0.5']['BASE']), batch_size=32, shuffle=True,
                           generator=torch.Generator().manual_seed(random_seed))
 
-# feature_extractorteacherv1 = FeatureExtractor(dim_in=24, dim_hidden=256)  # 注意这里的要调整为适应于表格数据的dim_in=8，dim_out=2，可以改
+# feature_extractorteacherv1 = FeatureExtractor(dim_in=24, dim_hidden=256)
 # classifierteacherv1 = Classifier(dim_hidden=256, dim_out=2)
 #
-# # 创建组合模型实例
 # tmodelmlp = CombinedModel(feature_extractorteacherv1, classifierteacherv1).to(device)
 # feature_extractorstudentv1 = FeatureExtractor(dim_in=24, dim_hidden=64)
 # classifierstudentv1 = Classifier(dim_hidden=64, dim_out=2)
@@ -776,16 +758,8 @@ model_s =get_student_model().to(device)
 
 
 
-"""
-进行重训模型
-"""
-# 其余的代码保持不变
-# 参数设置
 epochs =30
 learning_rate = 0.001
-
-# 数据加载和预处理
-
 best_accuracy=0
 best_accuracy_strained=0
 best_accuracy_s=0
@@ -816,15 +790,15 @@ optimizer_s = torch.optim.Adam(model_s.parameters(), lr=learning_rate)
 #             optimizer_strained.zero_grad()
 #             output = model_strained(X)
 #             # print(output)
-#             # output = torch.argmax(output, dim=1)  # 假设Y是独热编码，转换成类别索引
-#             # print(output.shape)  # 检查Y的形状
+#             # output = torch.argmax(output, dim=1)
+#             # print(output.shape)
 #             # print(output)
 #             # print(Y.shape)
 #             # print(Y)
-#             # Y = Y.squeeze(1) # 调整Y的形状和数据类型
+#             # Y = Y.squeeze(1)
 #             # print(Yield.shape)
 #             # print(Y)
-#             # Y = Y.squeeze(1).long()  # 调整Y的形状和数据类型
+#             # Y = Y.squeeze(1).long()
 #             # print("Model output shape:", output.shape)
 #             # print("Target labels:", Y.unique())
 #             loss = criterion(output, Y)
@@ -867,15 +841,15 @@ optimizer_s = torch.optim.Adam(model_s.parameters(), lr=learning_rate)
 #             optimizer.zero_grad()
 #             output = model(X)
 #             # print(output)
-#             # output = torch.argmax(output, dim=1)  # 假设Y是独热编码，转换成类别索引
-#             # print(output.shape)  # 检查Y的形状
+#             # output = torch.argmax(output, dim=1)
+#             # print(output.shape)
 #             # print(output)
 #             # print(Y.shape)
 #             # print(Y)
-#             # Y = Y.squeeze(1) # 调整Y的形状和数据类型
+#             # Y = Y.squeeze(1)
 #             # print(Yield.shape)
 #             # print(Y)
-#             # Y = Y.squeeze(1).long()  # 调整Y的形状和数据类型
+#             # Y = Y.squeeze(1).long()
 #             # print("Model output shape:", output.shape)
 #             # print("Target labels:", Y.unique())
 #             loss = criterion(output, Y)
@@ -888,24 +862,18 @@ optimizer_s = torch.optim.Adam(model_s.parameters(), lr=learning_rate)
 #     train_loss /= len(base1_loader.dataset)
 #     train_accuracy = 100 * correct / len(base1_loader.dataset)
 #     print(f"Train Loss: {train_loss:.4f}, Train Accuracy: {train_accuracy:.2f}%")
-#
-#     # 测试模型
 #     test_accuracy = test(model, test1_loader, device)
 #     print(f"Test Accuracy: {test_accuracy:.2f}%")
 #
-#     # 保存最佳模型
 #     if test_accuracy > best_accuracy:
 #         best_accuracy = test_accuracy
 #         logger.info(f"Saving best model with accuracy {best_accuracy}")
 #         best_model_state_trained = model.state_dict().copy()
 #         save_dir = "./quanzhong/MDD/"
 #
-#         # 如果文件夹不存在，则创建该文件夹
 #         if not os.path.exists(save_dir):
 #             os.makedirs(save_dir)
-#         # 定义保存权重的文件路径
 #         save_path_trained = os.path.join(save_dir, "best_trained_test.pth")
-#         # 保存模型权重到文件
 #         torch.save(best_model_state_trained, save_path_trained)
 #         logger.info(f"Model weights saved successfully to {save_path_trained}.")
 #
@@ -922,15 +890,15 @@ optimizer_s = torch.optim.Adam(model_s.parameters(), lr=learning_rate)
 #             optimizer_s.zero_grad()
 #             output = model_s(X)
 #             # print(output)
-#             # output = torch.argmax(output, dim=1)  # 假设Y是独热编码，转换成类别索引
-#             # print(output.shape)  # 检查Y的形状
+#             # output = torch.argmax(output, dim=1)
+#             # print(output.shape)
 #             # print(output)
 #             # print(Y.shape)
 #             # print(Y)
-#             # Y = Y.squeeze(1) # 调整Y的形状和数据类型
+#             # Y = Y.squeeze(1)
 #             # print(Yield.shape)
 #             # print(Y)
-#             # Y = Y.squeeze(1).long()  # 调整Y的形状和数据类型
+#             # Y = Y.squeeze(1).long()
 #             # print("Model output shape:", output.shape)
 #             # print("Target labels:", Y.unique())
 #             loss = criterion(output, Y)
@@ -939,16 +907,13 @@ optimizer_s = torch.optim.Adam(model_s.parameters(), lr=learning_rate)
 #             optimizer_s.step()
 #             pred = output.data.max(1)[1]
 #             correct += pred.eq(Y.view(-1)).sum().item()
-#
 #     train_loss /= len(base2_loader.dataset)
 #     train_accuracy = 100 * correct / len(base2_loader.dataset)
 #     print(f"Train Loss: {train_loss:.4f}, Train Accuracy: {train_accuracy:.2f}%")
 #
-#     # 测试模型
 #     test_accuracy = test(model_s, test1_loader, device)
 #     print(f"Test Accuracy: {test_accuracy:.2f}%")
 #
-#     # 保存最佳模型
 #     if test_accuracy > best_accuracy_s:
 #         best_accuracy_s = test_accuracy
 #         logger.info(f"Saving retrained best model with accuracy {best_accuracy_s}")
@@ -956,17 +921,13 @@ optimizer_s = torch.optim.Adam(model_s.parameters(), lr=learning_rate)
 #         u = best_model_state_retrained
 #         save_dir = "./quanzhong/MDD/"
 #
-#         # 如果文件夹不存在，则创建该文件夹
 #         if not os.path.exists(save_dir):
 #             os.makedirs(save_dir)
 #
-#         # 定义保存权重的文件路径
 #         save_path_retrained = os.path.join(save_dir, "best_retrained_test.pth")
 #
-#         # 保存模型权重到文件
 #         torch.save(best_model_state_retrained, save_path_retrained)
 #         logger.info(f"Model weights saved successfully to {save_path_retrained}.")
-
 # def adaptforget(num_epochsall, device, qf_100_loader, kd0_5_loader, test1_loader, cal_1000_loader,
 #                                caltest1_loader, best_model_state_retrained, best_model_state_trained):
 #     smodelmlp = get_student_model().to(device)
@@ -990,7 +951,7 @@ optimizer_s = torch.optim.Adam(model_s.parameters(), lr=learning_rate)
 #         print(f"Epoch {epoch} starting...")
 #         logger.info(f"Epoch {epoch} starting...")
 #
-#         # 进行 machine unlearning
+#         #  machine unlearning
 #         f_u, u, c_u = train_student_model_random(qf_100_loader, kd0_5_loader, tmodelmlp, modelmlp, smodelmlp, u, f_u)
 #         current_accuracy, accuracy1 = test_model(test1_loader, qf_100_loader, kd0_5_loader, device, modelmlp,
 #                                                  smodelmlp, tmodelmlp, u, f_u)
@@ -1002,8 +963,6 @@ optimizer_s = torch.optim.Adam(model_s.parameters(), lr=learning_rate)
 #         # logger
 #         print(f'>>average_euclidean_adapt: {average_euclidean_adapt}, average_manhattan_adapt: {average_manhattan_adapt}, average_cosine_similarity_adapt: {average_cosine_similarity_adapt}')
 #         logger.info(f'>>average_euclidean_adapt: {average_euclidean_adapt}, average_manhattan_adapt: {average_manhattan_adapt}, average_cosine_similarity_adapt: {average_cosine_similarity_adapt}')
-#
-#
 #         average_kl_div_adapt=calculate_kl_divergence(smodelmlp,best_model_state_retrained,smodelmlp_base2, qf_1_loader, device)
 #         print(f'>>average_kl_div_adapt: {average_kl_div_adapt}')
 #         logger.info(f'>>average_kl_div_adapt: {average_kl_div_adapt}')
@@ -1011,10 +970,7 @@ optimizer_s = torch.optim.Adam(model_s.parameters(), lr=learning_rate)
 #                                           caltest1_loader)
 #         logger.info(f'Test value: {_t}, p-value: {pv}, EMA: {EMA_res}, Risk score: {risk_score}')
 #         # print(f'Test value: {_t}, p-value: {pv}, EMA: {EMA_res}, Risk score: {risk_score}')
-#
-#         """
-#         如果需要在对抗部分执行代码，可以在此处解除注释
-#         """
+
 #         f_u = domainadaptation(f_u, u, qf_100_loader, kd0_5_loader_no)
 #         analyze_sample_similarity(smodelmlp,u,device,train_dataset,CONFIG)
 #         calculate_kl_divergence(smodelmlp, best_model_state_retrained,smodelmlp_base2, qf_1_loader, device)
@@ -1067,35 +1023,21 @@ optimizer_s = torch.optim.Adam(model_s.parameters(), lr=learning_rate)
 #                         help='learning rate (default: 1.0)')
 #
 #     args = parser.parse_args()
-#
-#
-#
-#
-#
-#
-#
-#
-#     # 使用的gpu
 #     use_cuda = not args.no_cuda and torch.cuda.is_available()
 #
 #     device = torch.device("cuda" if use_cuda else "cpu")
-#     # 不明白
 #     eps = args.pgd_eps
 #     iters = args.pgd_iter
 #     alpha = args.pgd_alpha
-#
 #     # k_arr = qf_100_indices
 #     # k_arr = qf_100_indices
 #     # print(qf_100_indices)
 #     k_arr = [100]
 #     #   k_arr = [1, 16, 64, 128, 256]
-#
 #     D_r_acc = []
 #     D_f_acc = []
 #     D_test_acc = []
-#     # 一个是  用于其他的数据集  的准确性   一个用于数据集的忘却的准确性 一个是 用于测试集的准确性
 #     # case1_D_r  case2_D_r  case3_D_r 是 三个方法
-#     # 1 一种简单的方法 其中模型在为学习的数据上微调 2 一种使用对抗样本的方法  3 一种使用对抗样本和权重重要性的方法
 #     case1_D_r = []
 #     case2_D_r = []
 #     case3_D_r = []
@@ -1201,7 +1143,7 @@ optimizer_s = torch.optim.Adam(model_s.parameters(), lr=learning_rate)
 #         # def train_model(model, trainloader, validloader, optimizer, criterion, device, epochs=10):
 #         #     model.to(device)
 #         #     best_accuracy = 0
-#         #     best_model_state = None  # 用于保存最佳模型的状态
+#         #     best_model_state = None
 #         #
 #         #     for epoch in range(epochs):
 #         #         model.train()
@@ -1214,7 +1156,6 @@ optimizer_s = torch.optim.Adam(model_s.parameters(), lr=learning_rate)
 #         #             loss.backward()
 #         #             optimizer.step()
 #         #
-#         #         # 在每个epoch结束后在验证集上评估模型
 #         #         model.eval()
 #         #         correct = 0
 #         #         total = 0
@@ -1228,20 +1169,17 @@ optimizer_s = torch.optim.Adam(model_s.parameters(), lr=learning_rate)
 #         #
 #         #         accuracy = 100 * correct / total
 #         #         print(f'Epoch {epoch + 1}: Validation Accuracy = {accuracy:.2f}%')
-#         #
-#         #         # 如果这个epoch的准确率高于之前的最高准确率，更新最佳模型状态
 #         #         if accuracy > best_accuracy:
 #         #             best_accuracy = accuracy
 #         #             best_model_state = model.state_dict().copy()  # 深拷贝模型状态
 #         #
 #         #     return best_model_state, best_accuracy
 #
-#         # # 训练模型并获得最佳模型状态
 #         # def train_model(model, trainloader, validloader, optimizer, criterion, device, epochs=10,
 #         #                 model_path='/root/autodl-tmp/wangbin/L2UL-main/weights/best_model.pth'):
 #         #     model.to(device)
 #         #     best_accuracy = 0
-#         #     best_model_state = None  # 用于保存最佳模型的状态
+#         #     best_model_state = None
 #         #
 #         #     for epoch in range(epochs):
 #         #         model.train()
@@ -1254,7 +1192,6 @@ optimizer_s = torch.optim.Adam(model_s.parameters(), lr=learning_rate)
 #         #             loss.backward()
 #         #             optimizer.step()
 #         #
-#         #         # 在每个epoch结束后在验证集上评估模型
 #         #         model.eval()
 #         #         correct = 0
 #         #         total = 0
@@ -1269,7 +1206,6 @@ optimizer_s = torch.optim.Adam(model_s.parameters(), lr=learning_rate)
 #         #         accuracy = 100 * correct / total
 #         #         print(f'Epoch {epoch + 1}: Validation Accuracy = {accuracy:.2f}%')
 #         #
-#         #         # 如果这个epoch的准确率高于之前的最高准确率，更新最佳模型状态
 #         #         if accuracy > best_accuracy:
 #         #             best_accuracy = accuracy
 #         #             best_model_state = model.state_dict().copy()  # 深拷贝模型状态
@@ -1283,7 +1219,7 @@ optimizer_s = torch.optim.Adam(model_s.parameters(), lr=learning_rate)
 #         #                    model_path='/root/autodl-tmp/wangbin/L2UL-main/weights/best_modelqf1.pth'):
 #         #     model.to(device)
 #         #     best_accuracy = 0
-#         #     best_model_state = None  # 用于保存最佳模型的状态
+#         #     best_model_state = None
 #         #
 #         #     for epoch in range(epochs):
 #         #         model.train()
@@ -1295,8 +1231,6 @@ optimizer_s = torch.optim.Adam(model_s.parameters(), lr=learning_rate)
 #         #             loss = criterion(outputs, labels)
 #         #             loss.backward()
 #         #             optimizer.step()
-#         #
-#         #         # 在每个epoch结束后在验证集上评估模型
 #         #         model.eval()
 #         #         correct = 0
 #         #         total = 0
@@ -1618,23 +1552,21 @@ optimizer_s = torch.optim.Adam(model_s.parameters(), lr=learning_rate)
 #
 #                 output_adv = model(adv_data.to(device))
 #                 output = model(data.to(device))
-#                 # target = target.squeeze().long()  # 是path的
-#                 # adv_target = adv_target.squeeze().long()  # 是path的
+#                 # target = target.squeeze().long()
+#                 # adv_target = adv_target.squeeze().long()
 #                 tensor11 = torch.randn(1, 1)
 #                 # print("target.size():", target.size())
 #                 if target.size() == tensor11.size():
-#                     # 如果是标量，增加一个维度并转换为 long 类型
+
 #                     target = target.squeeze(0).long()
 #                 else:
-#                     target = target.squeeze().long()  # 注意，这里的 squeeze 实际上不会改变形状
+#                     target = target.squeeze().long()  #
 #
 #                 if adv_target.size() == tensor11.size():
-#                     # 如果是标量，增加一个维度并转换为 long 类型
 #                     adv_target = adv_target.squeeze(0).long()
-#
 #                     # print(clabels.dim())
 #                 else:
-#                     adv_target = adv_target.squeeze().long()  # 注意，这里的 squeeze 实际上不会改变形状
+#                     adv_target = adv_target.squeeze().long()
 #                 loss_unlearn = -CE(output, target.to(device)) * (data.shape[0] / (adv_data.shape[0] + data.shape[0]))
 #                 loss_adv = CE(output_adv, adv_target.to(device)) * (
 #                             adv_data.shape[0] / (adv_data.shape[0] + data.shape[0]))
@@ -1658,12 +1590,10 @@ optimizer_s = torch.optim.Adam(model_s.parameters(), lr=learning_rate)
 #                     #     print ('unlearn_acc <=50 , Break at j = ', j, ' i = ', i)
 #                     print('unlearn_acc == 0, Break at j = ', j, ' i = ', i)
 #                     break
-#
 #             j += 1
 #
 #             if max_iter < j:
 #                 break
-#
 #         model.eval()
 #         unlearn_loss, unlearn_acc, unlearn_f1 = testins(model, device, unlearn_loader)
 #         # unlearn_loss, unlearn_acc,unlearn_f1 = test(model, device, qf_100_loader)
@@ -1725,14 +1655,11 @@ optimizer_s = torch.optim.Adam(model_s.parameters(), lr=learning_rate)
 #         net = net.cuda()
 #         unlearning_teacher = unlearning_teacher.cuda()
 #
-#     # 读取数据的root
 #     # root = "105_classes_pins_dataset" if args.dataset == "PinsFaceRecognition" else "./data"
 #
-#     # 照片的尺寸
 #
 #     img_size = 224 if network == "ViT" else 32
 #
-#     # 数据集 以及数据集加载
 #     # trainset = getattr(datasets, args.dataset)(
 #     #     root=root, download=True, train=True, unlearning=True, img_size=img_size
 #     # )
@@ -1754,13 +1681,10 @@ optimizer_s = torch.optim.Adam(model_s.parameters(), lr=learning_rate)
 #     #     trainset, [args.forget_perc, 1 - args.forget_perc]
 #     # )
 #
-#     # 数据集的加载
 #     # forget_train_dl = DataLoader(list(forget_train), batch_size=128)
 #
-#     # 修改1000的时候这里需要修改
 #     forget_train_dl = qf_1_loader
 #     # forget_train_dl = qf_100_loader
-#     # 修改1000的时候这里需要修改
 #     retain_train_dl = base2_loader
 #     # retain_train_dl = base2_loader
 #     # retain_train_dl = DataLoader(list(retain_train), batch_size=128, shuffle=True)
@@ -1780,7 +1704,6 @@ optimizer_s = torch.optim.Adam(model_s.parameters(), lr=learning_rate)
 #     #     batch_size=batch_size,
 #     # )
 #     full_train_dl = base1_loader
-#     # 修改1000的时候这里需要修改
 #     kwargs = {
 #         "model": net,
 #         "unlearning_teacher": unlearning_teacher,
@@ -1836,7 +1759,6 @@ optimizer_s = torch.optim.Adam(model_s.parameters(), lr=learning_rate)
 #     #     }
 #     # )
 
-# 调用函数
 # for qf1_start in range(402, 499):
 #     # best_model_state_retrained =torch.load('/root/autodl-tmp/wangbin/yiwang/afsandadapt/quanzhong/best_retrained_di.pth')
 #     # best_model_state_retrained =torch.load('/root/autodl-tmp/wangbin/yiwang/afsandadapt/quanzhong/best_retrained.pth')
@@ -1849,7 +1771,7 @@ optimizer_s = torch.optim.Adam(model_s.parameters(), lr=learning_rate)
 #     best_model_state_trained = torch.load('/mnt/f/BaiduNetdiskDownload/yiwang/afsandadapt/quanzhong/MDD/best_trained_test.pth')
 #     u11=best_model_state_retrained
 #     logger.info(f'>>qf1_start: {qf1_start}')
-#     qf1_end = qf1_start + 1  # 修改为您希望的大小
+#     qf1_end = qf1_start + 1
 #     CONFIG['QF1'] = {
 #         'QUERY': list(range(qf1_start, qf1_end)),
 #         'QUERY_MEMBER': [1 for _ in range(qf1_end - qf1_start)]
@@ -1883,7 +1805,7 @@ optimizer_s = torch.optim.Adam(model_s.parameters(), lr=learning_rate)
 #     # train_and_forget(network, kd0_5_loader,test1_loader,best_model_state_strained, best_model_state_retrained, dataset, classes, qf_1_dataset,qf1_loader, base2_dataset, method, gpu=True,train_dataset=train_dataset,CONFIG=CONFIG,cal_1000_loader=cal_100_loader,caltest1_loader=caltest1_loader)
 #
 #     #
-#     # subset_indices = base1_indices  # 获取 Subset 的索引
+#     # subset_indices = base1_indices
 #     # train_labels = TableDataset.get_labels(train_dataset, subset_indices)
 #     # instance(base1_dataset, base1_indices, test1_loader, best_model_state_retrained, best_model_state_strained,cal_100_loader, caltest1_loader, qf_1_indices,CONFIG,train_labels=train_labels,train_dataset=train_dataset)
 #
@@ -1918,7 +1840,7 @@ best_model_state_trained = torch.load('/root/autodl-tmp/wangbin/yiwang/afsandada
 u11=best_model_state_retrained
 logger.info(f'>>qf100_start:1')
 logger.info(f'>>diabetes jinxing de shiyan')
-# qf1_end = qf1_start + 1  # 修改为您希望的大小
+# qf1_end = qf1_start + 1
 # CONFIG['QF1'] = {
 #     'QUERY': list(range(qf1_start, qf1_end)),
 #     'QUERY_MEMBER': [1 for _ in range(qf1_end - qf1_start)]
@@ -1926,7 +1848,6 @@ logger.info(f'>>diabetes jinxing de shiyan')
 # qf_1_indices = CONFIG['QF1']['QUERY']
 # qf_1_dataset = Subset(train_dataset, qf_1_indices)
 # qf1_loader = DataLoader(Subset(train_dataset, CONFIG['QF1']['QUERY']), batch_size=32, shuffle=False)
-# 对retain的数据进行一个分析，得到一个
 # average_euclidean_retrained, average_manhattan_retrained, average_cosine_similarity_retrained = analyze_sample_similarity(
 #     model_s, u11,
 #     device,
@@ -1953,12 +1874,10 @@ method = 'ssd_tuning'
 # train_and_forget(network, base2_loader,test1_loader,best_model_state_strained, best_model_state_retrained, dataset, classes, QF1000dataset,qf_1000_loader, base2_dataset, method, gpu=True,train_dataset=train_dataset,CONFIG=CONFIG,cal_1000_loader=cal_100_loader,caltest1_loader=caltest1_loader)
 #
 
-# subset_indices = base1_indices  # 获取 Subset 的索引
+# subset_indices = base1_indices
 # train_labels = TableDataset.get_labels(train_dataset, subset_indices)
 # instance(base1_dataset, base1_indices, test1_loader, best_model_state_retrained, best_model_state_strained,cal_100_loader, caltest1_loader, QF100indices,CONFIG,train_labels=train_labels,train_dataset=train_dataset)
 
-#
-# # #
 adaptforget(
 
     train_dataset=train_dataset,
@@ -1999,17 +1918,3 @@ afs(args,best_model_state_trained,best_model_state_retrained,kd0_75_loader,base2
 # afs(args,best_model_state_trained)
 # afs(args,best_model_state_trained,base1_loader,base2_loader,test1_loader,cal_100_loader,caltest1_loader,qf_1000_loader,device)
 
-#
-# 写好准备的参数
-
-
-# afs的具体的代码
-
-
-
-
-
-
-# adaptforget的具体的代码
-# 重训的模型也要一起训练
-# 输出对应的模型的时候要保存最佳权重

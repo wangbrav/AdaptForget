@@ -1,5 +1,4 @@
 from __future__ import print_function
-#首先是数据集的加载 加载包括   有一个文件的加载  dataset的嘞也需要 还有一个是dataloader的加载  还有他的config  以及他的颜色扩充通道  以及其的加噪函数  transform  种子的设置
 import sys
 sys.path.append('/root/autodl-tmp/wangbin/yiwang')
 import copy
@@ -25,7 +24,7 @@ from qf1kosiam import  analyze_sample_similarity
 from qf1kosiam import analyze_sample_similarity
 
 from calculate_kl_divergence import calculate_kl_divergence
-global epochs  # Epoch编号
+global epochs
 # import utils.Purification
 import argparse
 import torch.nn as nn
@@ -70,16 +69,12 @@ from torchvision import datasets, transforms
 # from tsne_mnist_tuo import tsne
 from tsne_mnist_guding1 import tsnet
 from tsne_mnist_guding2 import tsnes
-# 相比上一个  更改了 数据集的划分方法
 # TODO xiangbi shangyige  zengjia le  afs
 from qf1kosiam import analyze_sample_similarity
 
 from calculate_kl_divergence import calculate_kl_divergence
-# 加载npz文件
 import torch.nn.init as init
-#   afs
 from copy import deepcopy
-
 import matplotlib.pyplot as plt
 import argparse
 import sys
@@ -127,18 +122,14 @@ import torch
 from torch.utils.data import Dataset
 # from Dataset import DataModule, CONFIG
 # from Model import get_teacher_model, get_student_model
-# 设置日志记录 循环
 logging.basicConfig(filename='training_log_qf1circulate_MDDv4.log', level=logging.INFO, format='%(asctime)s %(message)s')
 logger = logging.getLogger()
 class TableDataset(Dataset):
     def __init__(self, csv_file, transform=None, shuffle=True, seed=32):
         self.data_frame = pd.read_csv(csv_file)
 
-        # 如果启用随机化
         if shuffle:
-            # 设置随机种子
             np.random.seed(seed)
-            # 打乱数据框的索引
             shuffled_indices = np.random.permutation(self.data_frame.index)
             self.data_frame = self.data_frame.loc[shuffled_indices].reset_index(drop=True)
 
@@ -151,7 +142,7 @@ class TableDataset(Dataset):
         if torch.is_tensor(idx):
             idx = idx.tolist()
 
-        features = self.data_frame.iloc[idx, 1:-1].astype(np.float32).values  # 假设所有特征都是数值型
+        features = self.data_frame.iloc[idx, 1:-1].astype(np.float32).values
         labels = self.data_frame.iloc[idx, -1].astype(np.int64)
 
         if self.transform:
@@ -159,16 +150,10 @@ class TableDataset(Dataset):
 
         return torch.tensor(features, dtype=torch.float32), torch.tensor(labels, dtype=torch.int64)
 
-#这里需要更改gt的大小
-
-# 定义标准化转换
 def transform(features):
-    # 目前这里就简单的归一化处理，可以改
     return (features - features.mean()) / features.std()
 
-# 定义添加噪声的转换
 def transform_no(features):
-    # 在原始数据的每一个特征值上随意赋值0-10的随机数值
     noise = np.random.randint(0, 11, size=features.shape)
     return features + noise
 
@@ -246,9 +231,6 @@ def afs(args,best_model_state_trained,best_model_state_retrained,base1_loader,ba
             logger.info(f'>>average_kl_div_afs: {average_kl_div_afs}')
             # save_best_ckpt(snet, args)
             best_model_state_afs = snet.state_dict().copy()
-
-        # save_last_ckpt(snet, args)
-
 def parser():
     """
     :return: args
@@ -435,23 +417,8 @@ def parser():
                         help='number of num_workers')
     args = parser.parse_args()
     return args
-    # args = parser_forget.parse_args()
 args = parser()
 
-# args = parser(args.root)
-# def init_weights(m):
-#     if type(m) == nn.Conv2d or type(m) == nn.Linear:
-#         init.xavier_uniform_(m.weight)
-#         if m.bias is not None:
-#             init.zeros_(m.bias)
-# def zero_gradients(x):
-#     if isinstance(x, torch.Tensor):
-#         if x.grad is not None:
-#             x.grad.detach_()
-#             x.grad.zero_()
-#     elif isinstance(x, collections.abc.Iterable):
-#         for elem in x:
-#             zero_gradients(elem)
 
 def test(model, test_loader, device):
     model.eval()
@@ -463,7 +430,6 @@ def test(model, test_loader, device):
                 X, Y = X.to(device), Y.to(device)
                 outputs = model(X)
                 # _, predicted = torch.max(outputs.data, 1)
-                  # 调整Y的形状和数据类型
 
                 pred = outputs.data.max(1)[1]
                 # print(predicted.shape)
@@ -472,7 +438,7 @@ def test(model, test_loader, device):
 
                 # Y = Y.squeeze(1).long()
                 correct += pred.eq(Y.view(-1)).sum().item()
-                # print(f'Batch correct: {(predicted == Y).sum().item()}, Batch total: {Y.size(0)}')  # 新增的打印语句
+                # print(f'Batch correct: {(predicted == Y).sum().item()}, Batch total: {Y.size(0)}')
     print(f"Correct: {correct}, Total: {total}")
     accuracy = 100 * correct / total
     return accuracy
@@ -487,37 +453,21 @@ def train(snet, tnet, criterionCls, criterionKD, trainDataLoader, optimizer, arg
         for X, Y in tqdm(trainDataLoader):
             X = X.to(args.device)
             Y = Y.to(args.device)
-
-            # if 'PathMNIST' in args.root:
             Y = Y.squeeze().long()
-
-            #print(X)
             snet_pred = snet(X)
             tnet_pred = tnet(X)
-
-            #print(Y, tnet_pred, snet_pred)
-
             cls_loss = criterionCls(snet_pred, Y)
             kd_loss = criterionKD(snet_pred, tnet_pred.detach())
             cls_losses.update(cls_loss.item(), X.size(0))
             kd_losses.update(kd_loss.item(), X.size(0))
 
             loss = cls_loss + kd_loss* args.lambda_kd
-
-            #if loss < 1:
-            #    args.add_risk_loss = True
-            #    print(f'>> start using risk loss')
-            #else:
-            #    args.add_risk_loss = False
-
-
             if args.add_risk_loss == 1:
                 risk_loss = torch.tensor(0.0).to(args.device)
                 queryTestDataLoader = queryDataset
                 for _X, _Y in queryTestDataLoader:
                     _X = _X.to(args.device)
                     _Y = _Y.to(args.device)
-                    # if 'PathMNIST' in args.root:
                     _Y = _Y.squeeze().long()
                     if _Y.dim() == 0:
                         _Y = _Y.unsqueeze(0)
@@ -525,13 +475,7 @@ def train(snet, tnet, criterionCls, criterionKD, trainDataLoader, optimizer, arg
                     partial_risk_loss = torch.nn.CrossEntropyLoss().to(args.device)(out_Y, _Y)
                     risk_loss += partial_risk_loss
 
-                ## using Audit.api requires more time for training
-                #t, pv, EMA_res, risk_score = Audit.api(args, model, queryDataset, member_gt, calDataset)
-                #risk_loss = risk_score
-
-                risk_loss = torch.tensor(1.0).to(args.device) / risk_loss # same performance, strongly correlated
-
-                #risk_loss = risk_loss
+                risk_loss = torch.tensor(1.0).to(args.device) / risk_loss
                 risk_losses.update(risk_loss.item(), _X.size(0))
                 loss = loss + risk_loss*torch.tensor(args.lambda_risk).to(args.device)
 
@@ -552,61 +496,43 @@ def afstest(snet, tnet, criterionCls, criterionKD, testDataLoader, args):
     cls_losses = AverageMeter()
     kd_losses = AverageMeter()
     correct = 0
-
     snet.eval()
     tnet.eval()
-
     total_pred = []
     total_y = []
-
     with torch.no_grad():
         with tqdm(total=len(testDataLoader)) as t:
             for X, Y in tqdm(testDataLoader):
                 X = X.to(args.device)
                 Y = Y.to(args.device)
-
-                # if 'PathMNIST' in args.root:
                 Y = Y.squeeze().long()
-
                 snet_pred = snet(X)
                 tnet_pred = tnet(X)
-
                 cls_loss = criterionCls(snet_pred, Y)
                 kd_loss = criterionKD(snet_pred, tnet_pred.detach()) * args.lambda_kd
-
                 pred = snet_pred.data.max(1)[1]
                 correct += pred.eq(Y.view(-1)).sum().item()
-
                 cls_losses.update(cls_loss.item(), X.size(0))
                 kd_losses.update(kd_loss.item(), X.size(0))
-
                 t.set_postfix(
                     cls_losses='{:05.8f}'.format(cls_losses.avg),
                     kd_losses='{:05.8f}'.format(kd_losses.avg),
                 )
                 t.update()
-
                 total_pred += pred
                 total_y += Y.view(-1)
-
     test_acc = correct / len(testDataLoader.dataset)
     stat = Performance(total_pred, total_y)
-
     return test_acc, stat
-# 检查GPU是否可用
 device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
-
 print("Using device:", device)
 print("main")
-
 random_seed = 32
 random.seed(random_seed)
 np.random.seed(random_seed)
 torch.manual_seed(random_seed)
-
 if torch.cuda.is_available():
     torch.cuda.manual_seed_all(random_seed)
-
 CONFIG = {
 'BASE1': {
     'BASE' : list(range(0,3000))
@@ -673,28 +599,12 @@ CONFIG = {
 },
 }
 
-# class ExpandToRGB:
-#     """将单通道Tensor图像扩展为三通道"""
-#     def __call__(self, tensor):
-#         # 检查是否为单通道图像（形状为 [1, H, W]）
-#         if tensor.shape[0] == 1:
-#             # 重复通道以形成3通道图像
-#             tensor = tensor.repeat(3, 1, 1)
-#         return tensor
 
 
-
-
-
-
-
-
-
-csv_file = '/root/autodl-tmp/wangbin/yiwang/data/modified_raw_balanced_dataset.csv' # 数据集路径
+csv_file = '/root/autodl-tmp/wangbin/yiwang/data/modified_raw_balanced_dataset.csv'
 train_dataset = TableDataset(csv_file=csv_file, transform=transform)
 train_dataset_no = TableDataset(csv_file=csv_file, transform=transform_no)
 test_dataset = TableDataset(csv_file=csv_file, transform=transform)
-# train_dataset.shuffle_data()  # 使用固定种子打乱数据
 # train_dataset_no.shuffle_data()
 
 base1_indices = CONFIG['BASE1']['BASE']
@@ -728,10 +638,8 @@ kd0_25_loader = DataLoader(Subset(train_dataset, CONFIG['KD0.25']['BASE']), batc
 kd0_5_loader_no = DataLoader(Subset(train_dataset_no, CONFIG['KD0.5']['BASE']), batch_size=32, shuffle=True,
                           generator=torch.Generator().manual_seed(random_seed))
 
-# feature_extractorteacherv1 = FeatureExtractor(dim_in=24, dim_hidden=256)  # 注意这里的要调整为适应于表格数据的dim_in=8，dim_out=2，可以改
+# feature_extractorteacherv1 = FeatureExtractor(dim_in=24, dim_hidden=256)
 # classifierteacherv1 = Classifier(dim_hidden=256, dim_out=2)
-#
-# # 创建组合模型实例
 # tmodelmlp = CombinedModel(feature_extractorteacherv1, classifierteacherv1).to(device)
 # feature_extractorstudentv1 = FeatureExtractor(dim_in=24, dim_hidden=64)
 # classifierstudentv1 = Classifier(dim_hidden=64, dim_out=2)
@@ -750,27 +658,11 @@ kd0_5_loader_no = DataLoader(Subset(train_dataset_no, CONFIG['KD0.5']['BASE']), 
 model =get_teacher_model().to(device)
 model_strained =get_student_model().to(device)
 model_s =get_student_model().to(device)
-
-
-
-
-
-"""
-进行重训模型
-"""
-# 其余的代码保持不变
-# 参数设置
 epochs =40
 learning_rate = 0.001
-
-# 数据加载和预处理
-
 best_accuracy=0
 best_accuracy_strained=0
 best_accuracy_s=0
-
-
-
 best_model_state_retrained = None
 best_model_state_trained = None
 best_model_state_strained = None
@@ -778,10 +670,8 @@ best_model_state_strained = None
 
 criterion = nn.CrossEntropyLoss()
 optimizer = torch.optim.Adam(model.parameters(), lr=learning_rate)
-# 狗屎王斌的错
 # optimizer_strained = torch.optim.Adam(model.parameters(), lr=learning_rate)
 optimizer_strained = torch.optim.Adam(model_strained.parameters(), lr=learning_rate)
-#狗屎wushenjign是狗屎
 optimizer_s = torch.optim.Adam(model_s.parameters(), lr=learning_rate)
 
 # for epoch in range(epochs):
@@ -797,15 +687,15 @@ optimizer_s = torch.optim.Adam(model_s.parameters(), lr=learning_rate)
 #             optimizer_strained.zero_grad()
 #             output = model_strained(X)
 #             # print(output)
-#             # output = torch.argmax(output, dim=1)  # 假设Y是独热编码，转换成类别索引
-#             # print(output.shape)  # 检查Y的形状
+#             # output = torch.argmax(output, dim=1)
+#             # print(output.shape)
 #             # print(output)
 #             # print(Y.shape)
 #             # print(Y)
-#             # Y = Y.squeeze(1) # 调整Y的形状和数据类型
+#             # Y = Y.squeeze(1)
 #             # print(Yield.shape)
 #             # print(Y)
-#             # Y = Y.squeeze(1).long()  # 调整Y的形状和数据类型
+#             # Y = Y.squeeze(1).long()
 #             # print("Model output shape:", output.shape)
 #             # print("Target labels:", Y.unique())
 #             loss = criterion(output, Y)
@@ -819,11 +709,11 @@ optimizer_s = torch.optim.Adam(model_s.parameters(), lr=learning_rate)
 #     train_accuracy = 100 * correct / len(base1_loader.dataset)
 #     print(f"Train Loss: {train_loss:.4f}, Train Accuracy: {train_accuracy:.2f}%")
 #
-#     # 测试模型
+
 #     test_accuracy = test(model_strained, test1_loader, device)
 #     print(f"Test Accuracy: {test_accuracy:.2f}%")
 #
-#     # 保存最佳模型
+
 #     if test_accuracy > best_accuracy_strained:
 #         best_accuracy_strained = test_accuracy
 #         logger.info(f"Saving best model with accuracy {best_accuracy_strained}")
@@ -842,15 +732,15 @@ optimizer_s = torch.optim.Adam(model_s.parameters(), lr=learning_rate)
 #             optimizer.zero_grad()
 #             output = model(X)
 #             # print(output)
-#             # output = torch.argmax(output, dim=1)  # 假设Y是独热编码，转换成类别索引
-#             # print(output.shape)  # 检查Y的形状
+#             # output = torch.argmax(output, dim=1)
+#             # print(output.shape)
 #             # print(output)
 #             # print(Y.shape)
 #             # print(Y)
-#             # Y = Y.squeeze(1) # 调整Y的形状和数据类型
+#             # Y = Y.squeeze(1)
 #             # print(Yield.shape)
 #             # print(Y)
-#             # Y = Y.squeeze(1).long()  # 调整Y的形状和数据类型
+#             # Y = Y.squeeze(1).long()
 #             # print("Model output shape:", output.shape)
 #             # print("Target labels:", Y.unique())
 #             loss = criterion(output, Y)
@@ -863,12 +753,9 @@ optimizer_s = torch.optim.Adam(model_s.parameters(), lr=learning_rate)
 #     train_loss /= len(base1_loader.dataset)
 #     train_accuracy = 100 * correct / len(base1_loader.dataset)
 #     print(f"Train Loss: {train_loss:.4f}, Train Accuracy: {train_accuracy:.2f}%")
-#
-#     # 测试模型
 #     test_accuracy = test(model, test1_loader, device)
 #     print(f"Test Accuracy: {test_accuracy:.2f}%")
 #
-#     # 保存最佳模型
 #     if test_accuracy > best_accuracy:
 #         best_accuracy = test_accuracy
 #         logger.info(f"Saving best model with accuracy {best_accuracy}")
@@ -887,15 +774,15 @@ optimizer_s = torch.optim.Adam(model_s.parameters(), lr=learning_rate)
 #             optimizer_s.zero_grad()
 #             output = model_s(X)
 #             # print(output)
-#             # output = torch.argmax(output, dim=1)  # 假设Y是独热编码，转换成类别索引
-#             # print(output.shape)  # 检查Y的形状
+#             # output = torch.argmax(output, dim=1)
+#             # print(output.shape)
 #             # print(output)
 #             # print(Y.shape)
 #             # print(Y)
-#             # Y = Y.squeeze(1) # 调整Y的形状和数据类型
+#             # Y = Y.squeeze(1)
 #             # print(Yield.shape)
 #             # print(Y)
-#             # Y = Y.squeeze(1).long()  # 调整Y的形状和数据类型
+#             # Y = Y.squeeze(1).long()
 #             # print("Model output shape:", output.shape)
 #             # print("Target labels:", Y.unique())
 #             loss = criterion(output, Y)
@@ -908,18 +795,14 @@ optimizer_s = torch.optim.Adam(model_s.parameters(), lr=learning_rate)
 #     train_loss /= len(base2_loader.dataset)
 #     train_accuracy = 100 * correct / len(base2_loader.dataset)
 #     print(f"Train Loss: {train_loss:.4f}, Train Accuracy: {train_accuracy:.2f}%")
-#
-#     # 测试模型
 #     test_accuracy = test(model_s, test1_loader, device)
 #     print(f"Test Accuracy: {test_accuracy:.2f}%")
 #
-#     # 保存最佳模型
 #     if test_accuracy > best_accuracy_s:
 #         best_accuracy_s = test_accuracy
 #         logger.info(f"Saving retrained best model with accuracy {best_accuracy_s}")
 #         best_model_state_retrained = model_s.state_dict().copy()
 #         u = best_model_state_retrained
-#
 #         average_euclidean_retrained, average_manhattan_retrained, average_cosine_similarity_retrained = analyze_sample_similarity(model_s, u,
 #                                                                                                                 device,
 #                                                                                                                 train_dataset,
@@ -938,20 +821,15 @@ def adaptforget(num_epochsall, device, qf_100_loader, kd0_5_loader, test1_loader
     u = smodelmlp.state_dict()
     f_u = smodelmlp.feature_extractor.state_dict()
     modelmlp = get_teacher_model().to(device)
-
     smodelmlp_base2.load_state_dict(best_model_state_retrained)
     modelmlp.load_state_dict(best_model_state_trained)
-
     member_gt = [1 for _ in range(1)]
     num = 0
     best_accuracy = 0.0
 
     for epoch in range(num_epochsall):
-        # print(f"Epoch {epoch} starting...")
         print(f"Epoch {epoch} starting...")
         logger.info(f"Epoch {epoch} starting...")
-
-        # 进行 machine unlearning
         f_u, u, c_u = train_student_model_random(qf_100_loader, kd0_5_loader, tmodelmlp, modelmlp, smodelmlp, u, f_u)
         current_accuracy, accuracy1 = test_model(test1_loader, qf_100_loader, kd0_5_loader, device, modelmlp,
                                                  smodelmlp, tmodelmlp, u, f_u)
@@ -960,22 +838,14 @@ def adaptforget(num_epochsall, device, qf_100_loader, kd0_5_loader, test1_loader
                                                                                                                 device,
                                                                                                                 train_dataset,
                                                                                                                 CONFIG)
-        # logger
         print(f'>>average_euclidean_adapt: {average_euclidean_adapt}, average_manhattan_adapt: {average_manhattan_adapt}, average_cosine_similarity_adapt: {average_cosine_similarity_adapt}')
         logger.info(f'>>average_euclidean_adapt: {average_euclidean_adapt}, average_manhattan_adapt: {average_manhattan_adapt}, average_cosine_similarity_adapt: {average_cosine_similarity_adapt}')
-
-
         average_kl_div_adapt=calculate_kl_divergence(smodelmlp,best_model_state_retrained,smodelmlp_base2, qf_1_loader, device)
         print(f'>>average_kl_div_adapt: {average_kl_div_adapt}')
         logger.info(f'>>average_kl_div_adapt: {average_kl_div_adapt}')
         _t, pv, EMA_res, risk_score = api(device, smodelmlp, u, f_u, qf_100_loader, member_gt, cal_1000_loader,
                                           caltest1_loader)
         logger.info(f'Test value: {_t}, p-value: {pv}, EMA: {EMA_res}, Risk score: {risk_score}')
-        # print(f'Test value: {_t}, p-value: {pv}, EMA: {EMA_res}, Risk score: {risk_score}')
-
-        """
-        如果需要在对抗部分执行代码，可以在此处解除注释
-        """
         f_u = domainadaptation(f_u, u, qf_100_loader, kd0_5_loader_no)
         analyze_sample_similarity(smodelmlp,u,device,train_dataset,CONFIG)
         calculate_kl_divergence(smodelmlp, best_model_state_retrained,smodelmlp_base2, qf_1_loader, device)
@@ -987,7 +857,6 @@ def adaptforget(num_epochsall, device, qf_100_loader, kd0_5_loader, test1_loader
         logger.info(f'ad test value: {_t}, p_value: {pv}, ema: {EMA_res}, risk_score: {risk_score}')
 
 def instance(base1_dataset, base1_indices,test1_loader,best_model_state_retrained,best_model_state_strained,cal_1000_loader,caltest1_loader,qf_1_indices,CONFIG):
-    # Training settings
     parser = argparse.ArgumentParser(description='PyTorch MNIST Example')
     parser.add_argument('--batch-size', type=int, default=128, metavar='N',
                         help='input batch size for training (default: 64)')
@@ -1036,11 +905,8 @@ def instance(base1_dataset, base1_indices,test1_loader,best_model_state_retraine
 
 
 
-    # 使用的gpu
     use_cuda = not args.no_cuda and torch.cuda.is_available()
-
     device = torch.device("cuda" if use_cuda else "cpu")
-    # 不明白
     eps = args.pgd_eps
     iters = args.pgd_iter
     alpha = args.pgd_alpha
@@ -1054,9 +920,6 @@ def instance(base1_dataset, base1_indices,test1_loader,best_model_state_retraine
     D_r_acc = []
     D_f_acc = []
     D_test_acc = []
-    # 一个是  用于其他的数据集  的准确性   一个用于数据集的忘却的准确性 一个是 用于测试集的准确性
-    # case1_D_r  case2_D_r  case3_D_r 是 三个方法
-    # 1 一种简单的方法 其中模型在为学习的数据上微调 2 一种使用对抗样本的方法  3 一种使用对抗样本和权重重要性的方法
     case1_D_r = []
     case2_D_r = []
     case3_D_r = []
@@ -1083,10 +946,8 @@ def instance(base1_dataset, base1_indices,test1_loader,best_model_state_retraine
     #                    transform=transform)
 
     dataset1 = base1_dataset
-    # 一个 是训练数据集 一个 是测试数据集
     # dataset2 = datasets.CIFAR10('../data', train=False,
     #                    transform=transform)
-
     if use_cuda:
         cuda_kwargs = {'num_workers': 0,
                        'pin_memory': True,
@@ -1098,15 +959,14 @@ def instance(base1_dataset, base1_indices,test1_loader,best_model_state_retraine
 
         # torch.manual_seed(args.seed)
         # torch.cuda.manual_seed(args.seed)
-        # torch.cuda.manual_seed_all(args.seed)  # if use multi-GPU
+        # torch.cuda.manual_seed_all(args.seed)
         torch.backends.cudnn.deterministic = True
         torch.backends.cudnn.benchmark = False
         # np.random.seed(args.seed)
         # random.seed(args.seed)
 
         unlearn_label = args.unlearn_label
-        # 假设 dataset1 是通过 Subset 创建的，原始数据集是 pathmnist_dataset
-        subset_indices = base1_indices  # 获取 Subset 的索引
+        subset_indices = base1_indices
         train_labels = PathMNISTDataset.get_labels(train_dataset, subset_indices)
 
         # train_labels = dataset1.labels
@@ -1145,15 +1005,12 @@ def instance(base1_dataset, base1_indices,test1_loader,best_model_state_retraine
         # print(indices_other_data.contiguous().view(-1, ).shape)
 
         # cifar_test_loader = torch.utils.data.DataLoader(dataset2, **test_kwargs)
-
         print('len(unlearn_dataset) : ', len(unlearn_dataset), ' len(other_dataset) : ', len(other_dataset))
         criterion = nn.CrossEntropyLoss()
-
         # optimizer = optim.Adam(modelmlp.parameters(), lr=learning_rate)
         model = get_student_model().to(device)
         # normalize_layer = NormalizeLayer((0.5, 0.5, 0.5), (0.5, 0.5, 0.5))
         # model = torch.nn.Sequential(normalize_layer, model)
-
         optimizer = optim.SGD(model.parameters(), lr=args.unlearn_lr, momentum=0.9, weight_decay=1e-4)
 
         # model = resnet18().to(device)
@@ -1162,7 +1019,7 @@ def instance(base1_dataset, base1_indices,test1_loader,best_model_state_retraine
         # def train_model(model, trainloader, validloader, optimizer, criterion, device, epochs=10):
         #     model.to(device)
         #     best_accuracy = 0
-        #     best_model_state = None  # 用于保存最佳模型的状态
+        #     best_model_state = None
         #
         #     for epoch in range(epochs):
         #         model.train()
@@ -1175,7 +1032,6 @@ def instance(base1_dataset, base1_indices,test1_loader,best_model_state_retraine
         #             loss.backward()
         #             optimizer.step()
         #
-        #         # 在每个epoch结束后在验证集上评估模型
         #         model.eval()
         #         correct = 0
         #         total = 0
@@ -1190,19 +1046,17 @@ def instance(base1_dataset, base1_indices,test1_loader,best_model_state_retraine
         #         accuracy = 100 * correct / total
         #         print(f'Epoch {epoch + 1}: Validation Accuracy = {accuracy:.2f}%')
         #
-        #         # 如果这个epoch的准确率高于之前的最高准确率，更新最佳模型状态
         #         if accuracy > best_accuracy:
         #             best_accuracy = accuracy
-        #             best_model_state = model.state_dict().copy()  # 深拷贝模型状态
+        #             best_model_state = model.state_dict().copy()
         #
         #     return best_model_state, best_accuracy
 
-        # # 训练模型并获得最佳模型状态
         # def train_model(model, trainloader, validloader, optimizer, criterion, device, epochs=10,
         #                 model_path='/root/autodl-tmp/wangbin/L2UL-main/weights/best_model.pth'):
         #     model.to(device)
         #     best_accuracy = 0
-        #     best_model_state = None  # 用于保存最佳模型的状态
+        #     best_model_state = None
         #
         #     for epoch in range(epochs):
         #         model.train()
@@ -1215,7 +1069,6 @@ def instance(base1_dataset, base1_indices,test1_loader,best_model_state_retraine
         #             loss.backward()
         #             optimizer.step()
         #
-        #         # 在每个epoch结束后在验证集上评估模型
         #         model.eval()
         #         correct = 0
         #         total = 0
@@ -1230,11 +1083,9 @@ def instance(base1_dataset, base1_indices,test1_loader,best_model_state_retraine
         #         accuracy = 100 * correct / total
         #         print(f'Epoch {epoch + 1}: Validation Accuracy = {accuracy:.2f}%')
         #
-        #         # 如果这个epoch的准确率高于之前的最高准确率，更新最佳模型状态
         #         if accuracy > best_accuracy:
         #             best_accuracy = accuracy
-        #             best_model_state = model.state_dict().copy()  # 深拷贝模型状态
-        #             # 保存最佳模型的状态
+        #             best_model_state = model.state_dict().copy()
         #             torch.save(best_model_state, model_path)
         #             print(f"Saved new best model with accuracy: {best_accuracy:.2f}%")
         #
@@ -1244,7 +1095,7 @@ def instance(base1_dataset, base1_indices,test1_loader,best_model_state_retraine
         #                    model_path='/root/autodl-tmp/wangbin/L2UL-main/weights/best_modelqf1.pth'):
         #     model.to(device)
         #     best_accuracy = 0
-        #     best_model_state = None  # 用于保存最佳模型的状态
+        #     best_model_state = None
         #
         #     for epoch in range(epochs):
         #         model.train()
@@ -1257,7 +1108,6 @@ def instance(base1_dataset, base1_indices,test1_loader,best_model_state_retraine
         #             loss.backward()
         #             optimizer.step()
         #
-        #         # 在每个epoch结束后在验证集上评估模型
         #         model.eval()
         #         correct = 0
         #         total = 0
@@ -1272,11 +1122,9 @@ def instance(base1_dataset, base1_indices,test1_loader,best_model_state_retraine
         #         accuracy = 100 * correct / total
         #         print(f'Epoch {epoch + 1}: Validation Accuracy = {accuracy:.2f}%')
         #
-        #         # 如果这个epoch的准确率高于之前的最高准确率，更新最佳模型状态
         #         if accuracy > best_accuracy:
         #             best_accuracy = accuracy
-        #             best_model_state = model.state_dict().copy()  # 深拷贝模型状态
-        #             # 保存最佳模型的状态
+        #             best_model_state = model.state_dict().copy()
         #             torch.save(best_model_state, model_path)
         #             print(f"Saved new best model with accuracy: {best_accuracy:.2f}%")
         #
@@ -1289,19 +1137,14 @@ def instance(base1_dataset, base1_indices,test1_loader,best_model_state_retraine
 
         model.load_state_dict(best_model_statet)
         # model.load_state_dict(torch.load('/root/autodl-tmp/wangbin/L2UL-main/weights/best_model.pth'))
-        #   输出模型的结构   为什么要输出模型的结构
 
         # normalize_layer = NormalizeLayer((0.4914, 0.4822, 0.4465), (0.2023, 0.1994, 0.2010))
         # model = torch.nn.Sequential(normalize_layer, model)
-        # 定义损失函数和优化器
         # criterion = nn.CrossEntropyLoss()
-
         # optimizer = optim.Adam(modelmlp.parameters(), lr=learning_rate)
         optimizer = optim.SGD(model.parameters(), lr=args.unlearn_lr, momentum=0.9, weight_decay=1e-4)
-
         model.eval()
         print('Baseline 1: Naiive Appraoch - finetuning with D_forget (maximizing CE loss)')
-
         # other_loss, other_acc,other_f1 = test(model, device, base2_loader)
         other_loss, other_acc, other_f1 = testins(model, device, other_loader)
         # unlearn_loss, unlearn_acc,unlearn_f1 = test(model, device, qf_100_loader)
@@ -1331,12 +1174,9 @@ def instance(base1_dataset, base1_indices,test1_loader,best_model_state_retraine
             model.eval()
             # unlearn_loss, unlearn_acc,unlearn_f1 = test(model, device, qf_100_loader)
             unlearn_loss, unlearn_acc, unlearn_f1 = testins(model, device, unlearn_loader)
-
             j += 1
-            # print(1)
             if max_iter < j:
                 break
-
         model.eval()
         # other_loss, other_acc,other_f1 = test(model, device, base2_loader)
         other_loss, other_acc, other_f1 = testins(model, device, other_loader)
@@ -1439,21 +1279,18 @@ def instance(base1_dataset, base1_indices,test1_loader,best_model_state_retraine
 
                 output_adv = model(adv_data.to(device))
                 output = model(data.to(device))
-                # target = target.squeeze().long()  # 是path的
-                # adv_target = adv_target.squeeze().long()  # 是path的
+                # target = target.squeeze().long()
+                # adv_target = adv_target.squeeze().long()
                 tensor11 = torch.randn(1, 1)
                 # print("target.size():", target.size())
                 if target.size() == tensor11.size():
-                    # 如果是标量，增加一个维度并转换为 long 类型
                     target = target.squeeze(0).long()
                 else:
-                    target = target.squeeze().long()  # 注意，这里的 squeeze 实际上不会改变形状
+                    target = target.squeeze().long()
 
                 if adv_target.size() == tensor11.size():
-                    # 如果是标量，增加一个维度并转换为 long 类型
                     adv_target = adv_target.squeeze(0).long()
                 else:
-                    # 如果不是标量，仅转换类型为 long
                     adv_target = adv_target.squeeze().long()
                 loss_unlearn = -CE(output, target.to(device)) * (data.shape[0] / (adv_data.shape[0] + data.shape[0]))
                 loss_adv = CE(output_adv, adv_target.to(device)) * (
@@ -1490,7 +1327,7 @@ def instance(base1_dataset, base1_indices,test1_loader,best_model_state_retraine
         member_gt = [1 for i in range(1)]
         qf1_model = deepcopy(model)
         qf1_model.load_state_dict(best_model_stateqf1)
-        #
+
         # average_euclidean0, average_manhattan0, average_cosine_similarity0 = analyze_sample_similarity(qf1_model,
         #                                                                                                device,
         #                                                                                                train_dataset,
@@ -1507,7 +1344,6 @@ def instance(base1_dataset, base1_indices,test1_loader,best_model_state_retraine
         # print(
         #     f'average_euclidean1: {average_euclidean1}, average_manhattan1: {average_manhattan1}, average_cosine_similarity1: {average_cosine_similarity1}')
         # print(f'average_kl_div: {average_kl_div}')
-
         case2_D_test.append(test_acc)
         case2_D_r.append(other_acc)
         case2_D_f.append(unlearn_acc)
@@ -1570,32 +1406,23 @@ def instance(base1_dataset, base1_indices,test1_loader,best_model_state_retraine
         while unlearn_acc != 0:
             # while unlearn_acc > 50:
             for i, data in enumerate(zip(adv_loader, unlearn_loader_cycle)):
-
                 model.train()
-
                 (adv_data, adv_target), (data, target) = data
-
                 optimizer.zero_grad()
-
                 output_adv = model(adv_data.to(device))
                 output = model(data.to(device))
-                # target = target.squeeze().long()  # 是path的
-                # adv_target = adv_target.squeeze().long()  # 是path的
+                # target = target.squeeze().long()
+                # adv_target = adv_target.squeeze().long()
                 tensor11 = torch.randn(1, 1)
-                # print("target.size():", target.size())
                 if target.size() == tensor11.size():
-                    # 如果是标量，增加一个维度并转换为 long 类型
                     target = target.squeeze(0).long()
                 else:
-                    target = target.squeeze().long()  # 注意，这里的 squeeze 实际上不会改变形状
+                    target = target.squeeze().long()
 
                 if adv_target.size() == tensor11.size():
-                    # 如果是标量，增加一个维度并转换为 long 类型
                     adv_target = adv_target.squeeze(0).long()
-
-                    # print(clabels.dim())
                 else:
-                    adv_target = adv_target.squeeze().long()  # 注意，这里的 squeeze 实际上不会改变形状
+                    adv_target = adv_target.squeeze().long()
                 loss_unlearn = -CE(output, target.to(device)) * (data.shape[0] / (adv_data.shape[0] + data.shape[0]))
                 loss_adv = CE(output_adv, adv_target.to(device)) * (
                             adv_data.shape[0] / (adv_data.shape[0] + data.shape[0]))
@@ -1686,14 +1513,10 @@ def train_and_forget(network, best_model_state_strained,best_model_state_retrain
         net = net.cuda()
         unlearning_teacher = unlearning_teacher.cuda()
 
-    # 读取数据的root
+
     # root = "105_classes_pins_dataset" if args.dataset == "PinsFaceRecognition" else "./data"
-
-    # 照片的尺寸
-
     img_size = 224 if network == "ViT" else 32
 
-    # 数据集 以及数据集加载
     # trainset = getattr(datasets, args.dataset)(
     #     root=root, download=True, train=True, unlearning=True, img_size=img_size
     # )
@@ -1705,23 +1528,19 @@ def train_and_forget(network, best_model_state_strained,best_model_state_retrain
     # trainloader = DataLoader(trainset, num_workers=4, batch_size=args.b, shuffle=True)
     validloader = test1_loader
     # validloader = DataLoader(validset, num_workers=4, batch_size=args.b, shuffle=False)
-    # 数据集划分
     # print("Dataset length:", len(trainset))
     # dataset_length=len(trainset)
-    # split1 = int(dataset_length * 0.002)  # 80% 用于训练
-    # split2 = dataset_length - split1    # 剩余的 20% 用于验证
+    # split1 = int(dataset_length * 0.002)
+    # split2 = dataset_length - split1
     # forget_train, retain_train = torch.utils.data.random_split(trainset, [split1, split2])
     # forget_train, retain_train = torch.utils.data.random_split(
     #     trainset, [args.forget_perc, 1 - args.forget_perc]
     # )
 
-    # 数据集的加载
     # forget_train_dl = DataLoader(list(forget_train), batch_size=128)
 
-    # 修改1000的时候这里需要修改
     forget_train_dl = qf_1_loader
     # forget_train_dl = qf_100_loader
-    # 修改1000的时候这里需要修改
     retain_train_dl = base2_loader
     # retain_train_dl = base2_loader
     # retain_train_dl = DataLoader(list(retain_train), batch_size=128, shuffle=True)
@@ -1741,7 +1560,6 @@ def train_and_forget(network, best_model_state_strained,best_model_state_retrain
     #     batch_size=batch_size,
     # )
     full_train_dl = base1_loader
-    # 修改1000的时候这里需要修改
     kwargs = {
         "model": net,
         "unlearning_teacher": unlearning_teacher,
@@ -1768,10 +1586,6 @@ def train_and_forget(network, best_model_state_strained,best_model_state_retrain
         "train_dataset": train_dataset,
     }
 
-
-
-    # wandb.init(project=f"{args.dataset}_forget_random_{args.forget_perc}", name=f'{args.method}')
-
     import time
 
     start = time.time()
@@ -1784,20 +1598,6 @@ def train_and_forget(network, best_model_state_strained,best_model_state_retrain
 
     print(testacc, retainacc, zrf, mia)
     logger.info(f"TestAcc: {testacc}, RetainTestAcc: {retainacc}, ZRF: {zrf}, MIA: {mia}, Df: {d_f}")
-    # wandb.log(
-    #     {
-    #         "TestAcc": testacc,
-    #         "RetainTestAcc": retainacc,
-    #         "ZRF": zrf,
-    #         "MIA": mia,
-    #         "Df": d_f,
-    #         "model_scaler": model_size_scaler,
-    #         "MethodTime": time_elapsed,
-    #         # do not forget to deduct baseline time from it to remove results calc (acc, MIA, ...)
-    #     }
-    # )
-
-# 调用函数
 for qf1_start in range(2901, 2999):
     logger.info(f'>>qf1_start: {qf1_start}')
     qf1_end = qf1_start + 1  # 修改为您希望的大小
@@ -1856,17 +1656,3 @@ for qf1_start in range(2901, 2999):
 # afs(args,best_model_state_trained)
 # afs(args,best_model_state_trained,base1_loader,base2_loader,test1_loader,cal_1000_loader,caltest1_loader,qf_100_loader,device)
 
-#
-# 写好准备的参数
-
-
-# afs的具体的代码
-
-
-
-
-
-
-# adaptforget的具体的代码
-# 重训的模型也要一起训练
-# 输出对应的模型的时候要保存最佳权重

@@ -26,7 +26,7 @@ from qf1kosiam import  analyze_sample_similarity
 from qf1kosiam import analyze_sample_similarity
 
 from calculate_kl_divergence import calculate_kl_divergence
-global epochs  # Epoch编号
+global epochs
 # import utils.Purification
 import argparse
 import torch.nn as nn
@@ -136,12 +136,8 @@ logger = logging.getLogger()
 class TableDataset(Dataset):
     def __init__(self, csv_file, transform=None, shuffle=True, seed=32):
         self.data_frame = pd.read_csv(csv_file)
-
-        # 如果启用随机化
         if shuffle:
-            # 设置随机种子
             np.random.seed(seed)
-            # 打乱数据框的索引
             shuffled_indices = np.random.permutation(self.data_frame.index)
             self.data_frame = self.data_frame.loc[shuffled_indices].reset_index(drop=True)
 
@@ -154,7 +150,7 @@ class TableDataset(Dataset):
         if torch.is_tensor(idx):
             idx = idx.tolist()
 
-        features = self.data_frame.iloc[idx, 1:-1].astype(np.float32).values  # 假设所有特征都是数值型
+        features = self.data_frame.iloc[idx, 1:-1].astype(np.float32).values
         labels = self.data_frame.iloc[idx, -1].astype(np.int64)
 
         if self.transform:
@@ -163,20 +159,12 @@ class TableDataset(Dataset):
         return torch.tensor(features, dtype=torch.float32), torch.tensor(labels, dtype=torch.int64)
 
     def get_labels(self, indices):
-        # 直接从数据框中提取指定索引的标签
         return self.data_frame.iloc[indices, -1].astype(np.int64).tolist()
 
-
-#这里需要更改gt的大小
-
-# 定义标准化转换
 def transform(features):
-    # 目前这里就简单的归一化处理，可以改
     return (features - features.mean()) / features.std()
 
-# 定义添加噪声的转换
 def transform_no(features):
-    # 在原始数据的每一个特征值上随意赋值0-10的随机数值
     noise = np.random.randint(0, 11, size=features.shape)
     return features + noise
 
@@ -445,7 +433,7 @@ def weights_init(m):
 #     return args
 #     # args = parser_forget.parse_args()
 # args = parser()
-'''原来没有注释上面'''
+'''It turned out there was no comment above'''
 # args = parser(args.root)
 # def init_weights(m):
 #     if type(m) == nn.Conv2d or type(m) == nn.Linear:
@@ -480,7 +468,7 @@ def weights_init(m):
 #
 #                 # Y = Y.squeeze(1).long()
 #                 correct += pred.eq(Y.view(-1)).sum().item()
-#                 # print(f'Batch correct: {(predicted == Y).sum().item()}, Batch total: {Y.size(0)}')  # 新增的打印语句
+#                 # print(f'Batch correct: {(predicted == Y).sum().item()}, Batch total: {Y.size(0)}')
 #     print(f"Correct: {correct}, Total: {total}")
 #     accuracy = 100 * correct / total
 #     return accuracy
@@ -667,29 +655,13 @@ CONFIG = {
 },
 }
 
-# class ExpandToRGB:
-#     """将单通道Tensor图像扩展为三通道"""
-#     def __call__(self, tensor):
-#         # 检查是否为单通道图像（形状为 [1, H, W]）
-#         if tensor.shape[0] == 1:
-#             # 重复通道以形成3通道图像
-#             tensor = tensor.repeat(3, 1, 1)
-#         return tensor
 
-
-
-
-
-
-
-csv_file = '/root/autodl-tmp/wangbin/yiwang/data/final.csv' # 数据集路径
-
-
-# csv_file = '/mnt/f/BaiduNetdiskDownload/yiwang/data/final.csv' # 数据集路径
+csv_file = '/root/autodl-tmp/wangbin/yiwang/data/final.csv'
+# csv_file = '/mnt/f/BaiduNetdiskDownload/yiwang/data/final.csv'
 train_dataset = TableDataset(csv_file=csv_file, transform=transform)
 train_dataset_no = TableDataset(csv_file=csv_file, transform=transform_no)
 test_dataset = TableDataset(csv_file=csv_file, transform=transform)
-# train_dataset.shuffle_data()  # 使用固定种子打乱数据
+# train_dataset.shuffle_data()
 # train_dataset_no.shuffle_data()
 
 base1_indices = CONFIG['BASE1']['BASE']
@@ -726,7 +698,6 @@ kd0_5_loader_no = DataLoader(Subset(train_dataset_no, CONFIG['KD0.5']['BASE']), 
 # feature_extractorteacherv1 = FeatureExtractor(dim_in=24, dim_hidden=256)  # 注意这里的要调整为适应于表格数据的dim_in=8，dim_out=2，可以改
 # classifierteacherv1 = Classifier(dim_hidden=256, dim_out=2)
 #
-# # 创建组合模型实例
 # tmodelmlp = CombinedModel(feature_extractorteacherv1, classifierteacherv1).to(device)
 # feature_extractorstudentv1 = FeatureExtractor(dim_in=24, dim_hidden=64)
 # classifierstudentv1 = Classifier(dim_hidden=64, dim_out=2)
@@ -748,12 +719,9 @@ model_s =get_student_model().to(device)
 
 
 
-# # 参数设置
 epochs =10
 learning_rate = 0.001
-#
-# # 数据加载和预处理
-#
+
 best_accuracy=0
 best_accuracy_strained=0
 best_accuracy_s=0
@@ -783,15 +751,15 @@ for epoch in range(epochs):
             optimizer_strained.zero_grad()
             output = model_strained(X)
             # print(output)
-            # output = torch.argmax(output, dim=1)  # 假设Y是独热编码，转换成类别索引
-            # print(output.shape)  # 检查Y的形状
+            # output = torch.argmax(output, dim=1)
+            # print(output.shape)
             # print(output)
             # print(Y.shape)
             # print(Y)
-            # Y = Y.squeeze(1) # 调整Y的形状和数据类型
+            # Y = Y.squeeze(1)
             # print(Yield.shape)
             # print(Y)
-            # Y = Y.squeeze(1).long()  # 调整Y的形状和数据类型
+            # Y = Y.squeeze(1).long()
             # print("Model output shape:", output.shape)
             # print("Target labels:", Y.unique())
             loss = criterion(output, Y)
@@ -817,21 +785,17 @@ for epoch in range(epochs):
     print(f"f1_score: {f1_score:.2f}%")
     logger.info(f"Test Accuracy: {test_accuracy:.2f}%")
 
-    # # 保存最佳模型
     # if test_accuracy > best_accuracy_strained:
     #     best_accuracy_strained = test_accuracy
     #     logger.info(f"Saving best model with accuracy {best_accuracy_strained}")
     #     best_model_state_strained = model_strained.state_dict().copy()
     #     save_dir = "./quanzhong/"
     #
-    #     # 如果文件夹不存在，则创建该文件夹
     #     if not os.path.exists(save_dir):
     #         os.makedirs(save_dir)
     #
-    #     # 定义保存权重的文件路径
     #     save_path_strained = os.path.join(save_dir, "best_strained_test.pth")
     #
-    #     # 保存模型权重到文件
     #     torch.save(best_model_state_strained, save_path_strained)
     #     logger.info(f"Model weights saved successfully to {save_path_strained}.")
 
@@ -848,15 +812,15 @@ for epoch in range(epochs):
             optimizer.zero_grad()
             output = model(X)
             # print(output)
-            # output = torch.argmax(output, dim=1)  # 假设Y是独热编码，转换成类别索引
-            # print(output.shape)  # 检查Y的形状
+            # output = torch.argmax(output, dim=1)
+            # print(output.shape)
             # print(output)
             # print(Y.shape)
             # print(Y)
-            # Y = Y.squeeze(1) # 调整Y的形状和数据类型
+            # Y = Y.squeeze(1)
             # print(Yield.shape)
             # print(Y)
-            # Y = Y.squeeze(1).long()  # 调整Y的形状和数据类型
+            # Y = Y.squeeze(1).long()
             # print("Model output shape:", output.shape)
             # print("Target labels:", Y.unique())
             loss = criterion(output, Y)
@@ -870,23 +834,18 @@ for epoch in range(epochs):
     train_accuracy = 100 * correct / len(base1_loader.dataset)
     print(f"Train Loss: {train_loss:.4f}, Train Accuracy: {train_accuracy:.2f}%")
 
-    # 测试模型
     test_accuracy,f1_score = test(model, test1_loader, device)
     print(f"Test Accuracy: {test_accuracy:.2f}%")
     print(f"f1_score: {f1_score:.2f}%")
-    # 保存最佳模型
     if test_accuracy > best_accuracy:
         best_accuracy = test_accuracy
         logger.info(f"Saving best model with accuracy {best_accuracy}")
         best_model_state_trained = model.state_dict().copy()
         save_dir = "./quanzhong/asd/"
 
-        # 如果文件夹不存在，则创建该文件夹
         if not os.path.exists(save_dir):
             os.makedirs(save_dir)
-        # 定义保存权重的文件路径
         save_path_trained = os.path.join(save_dir, "best_trained_test.pth")
-        # 保存模型权重到文件
         torch.save(best_model_state_trained, save_path_trained)
         logger.info(f"Model weights saved successfully to {save_path_trained}.")
 
@@ -903,15 +862,15 @@ for epoch in range(epochs):
             optimizer_s.zero_grad()
             output = model_s(X)
             # print(output)
-            # output = torch.argmax(output, dim=1)  # 假设Y是独热编码，转换成类别索引
-            # print(output.shape)  # 检查Y的形状
+            # output = torch.argmax(output, dim=1)
+            # print(output.shape)
             # print(output)
             # print(Y.shape)
             # print(Y)
-            # Y = Y.squeeze(1) # 调整Y的形状和数据类型
+            # Y = Y.squeeze(1)
             # print(Yield.shape)
             # print(Y)
-            # Y = Y.squeeze(1).long()  # 调整Y的形状和数据类型
+            # Y = Y.squeeze(1).long()
             # print("Model output shape:", output.shape)
             # print("Target labels:", Y.unique())
             loss = criterion(output, Y)
@@ -938,7 +897,6 @@ for epoch in range(epochs):
         u = best_model_state_retrained
         save_dir = "./quanzhong/asd/"
 
-        # 如果文件夹不存在，则创建该文件夹
         if not os.path.exists(save_dir):
             os.makedirs(save_dir)
 
@@ -957,9 +915,7 @@ for epoch in range(epochs):
         # logger.info(f'>>average_euclidean_retrained: {average_euclidean_retrained}, average_manhattan_retrained: {average_manhattan_retrained}, average_cosine_similarity_retrained: {average_cosine_similarity_retrained}')
         #
 
-"""
-进行重训模型
-"""
+
 # 其余的代码保持不变
 # 参数设置
 # epochs =40
@@ -1021,11 +977,9 @@ for epoch in range(epochs):
 #     train_accuracy = 100 * correct / len(base1_loader.dataset)
 #     print(f"Train Loss: {train_loss:.4f}, Train Accuracy: {train_accuracy:.2f}%")
 #
-#     # 测试模型
 #     test_accuracy = test(model_strained, test1_loader, device)
 #     print(f"Test Accuracy: {test_accuracy:.2f}%")
 #
-#     # 保存最佳模型
 #     if test_accuracy > best_accuracy_strained:
 #         best_accuracy_strained = test_accuracy
 #         logger.info(f"Saving best model with accuracy {best_accuracy_strained}")
@@ -1044,15 +998,15 @@ for epoch in range(epochs):
 #             optimizer.zero_grad()
 #             output = model(X)
 #             # print(output)
-#             # output = torch.argmax(output, dim=1)  # 假设Y是独热编码，转换成类别索引
-#             # print(output.shape)  # 检查Y的形状
+#             # output = torch.argmax(output, dim=1)
+#             # print(output.shape)
 #             # print(output)
 #             # print(Y.shape)
 #             # print(Y)
-#             # Y = Y.squeeze(1) # 调整Y的形状和数据类型
+#             # Y = Y.squeeze(1)
 #             # print(Yield.shape)
 #             # print(Y)
-#             # Y = Y.squeeze(1).long()  # 调整Y的形状和数据类型
+#             # Y = Y.squeeze(1).long()
 #             # print("Model output shape:", output.shape)
 #             # print("Target labels:", Y.unique())
 #             loss = criterion(output, Y)
@@ -1066,7 +1020,6 @@ for epoch in range(epochs):
 #     train_accuracy = 100 * correct / len(base1_loader.dataset)
 #     print(f"Train Loss: {train_loss:.4f}, Train Accuracy: {train_accuracy:.2f}%")
 #
-#     # 测试模型
 #     test_accuracy = test(model, test1_loader, device)
 #     print(f"Test Accuracy: {test_accuracy:.2f}%")
 #
@@ -1111,11 +1064,9 @@ for epoch in range(epochs):
 #     train_accuracy = 100 * correct / len(base2_loader.dataset)
 #     print(f"Train Loss: {train_loss:.4f}, Train Accuracy: {train_accuracy:.2f}%")
 #
-#     # 测试模型
 #     test_accuracy = test(model_s, test1_loader, device)
 #     print(f"Test Accuracy: {test_accuracy:.2f}%")
 #
-#     # 保存最佳模型
 #     if test_accuracy > best_accuracy_s:
 #         best_accuracy_s = test_accuracy
 #         logger.info(f"Saving retrained best model with accuracy {best_accuracy_s}")
@@ -1153,7 +1104,7 @@ for epoch in range(epochs):
 #         print(f"Epoch {epoch} starting...")
 #         logger.info(f"Epoch {epoch} starting...")
 #
-#         # 进行 machine unlearning
+#         #  machine unlearning
 #         f_u, u, c_u = train_student_model_random(qf_100_loader, kd0_5_loader, tmodelmlp, modelmlp, smodelmlp, u, f_u)
 #         current_accuracy, accuracy1 = test_model(test1_loader, qf_100_loader, kd0_5_loader, device, modelmlp,
 #                                                  smodelmlp, tmodelmlp, u, f_u)
@@ -1162,11 +1113,8 @@ for epoch in range(epochs):
 #                                                                                                                 device,
 #                                                                                                                 train_dataset,
 #                                                                                                                 CONFIG)
-#         # logger
 #         print(f'>>average_euclidean_adapt: {average_euclidean_adapt}, average_manhattan_adapt: {average_manhattan_adapt}, average_cosine_similarity_adapt: {average_cosine_similarity_adapt}')
 #         logger.info(f'>>average_euclidean_adapt: {average_euclidean_adapt}, average_manhattan_adapt: {average_manhattan_adapt}, average_cosine_similarity_adapt: {average_cosine_similarity_adapt}')
-#
-#
 #         average_kl_div_adapt=calculate_kl_divergence(smodelmlp,best_model_state_retrained,smodelmlp_base2, qf_1_loader, device)
 #         print(f'>>average_kl_div_adapt: {average_kl_div_adapt}')
 #         logger.info(f'>>average_kl_div_adapt: {average_kl_div_adapt}')
@@ -1174,10 +1122,6 @@ for epoch in range(epochs):
 #                                           caltest1_loader)
 #         logger.info(f'Test value: {_t}, p-value: {pv}, EMA: {EMA_res}, Risk score: {risk_score}')
 #         # print(f'Test value: {_t}, p-value: {pv}, EMA: {EMA_res}, Risk score: {risk_score}')
-#
-#         """
-#         如果需要在对抗部分执行代码，可以在此处解除注释
-#         """
 #         f_u = domainadaptation(f_u, u, qf_100_loader, kd0_5_loader_no)
 #         analyze_sample_similarity(smodelmlp,u,device,train_dataset,CONFIG)
 #         calculate_kl_divergence(smodelmlp, best_model_state_retrained,smodelmlp_base2, qf_1_loader, device)
@@ -1187,9 +1131,7 @@ for epoch in range(epochs):
 #         print(f'ad test value: {_t}, p_value: {pv}, ema: {EMA_res}, risk_score: {risk_score}')
 #         # print(f'ad test value: {_t}, p_value: {pv}, ema: {EMA_res}, risk_score: {risk_score}')
 #         logger.info(f'ad test value: {_t}, p_value: {pv}, ema: {EMA_res}, risk_score: {risk_score}')
-#
 # def instance(base1_dataset, base1_indices,test1_loader,best_model_state_retrained,best_model_state_strained,cal_1000_loader,caltest1_loader,qf_1_indices,CONFIG):
-#     # Training settings
 #     parser = argparse.ArgumentParser(description='PyTorch MNIST Example')
 #     parser.add_argument('--batch-size', type=int, default=128, metavar='N',
 #                         help='input batch size for training (default: 64)')
@@ -1238,11 +1180,8 @@ for epoch in range(epochs):
 #
 #
 #
-#     # 使用的gpu
 #     use_cuda = not args.no_cuda and torch.cuda.is_available()
-#
 #     device = torch.device("cuda" if use_cuda else "cpu")
-#     # 不明白
 #     eps = args.pgd_eps
 #     iters = args.pgd_iter
 #     alpha = args.pgd_alpha
