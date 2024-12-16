@@ -51,7 +51,6 @@ from tsne_mnist_guding1 import tsnet
 from qf1kosiam import analyze_sample_similarity
 
 from calculate_kl_divergence import calculate_kl_divergence
-# 加载npz文件
 import torch.nn.init as init
 #   afs
 from copy import deepcopy
@@ -134,7 +133,7 @@ def adaptforget(lambda_domain,lambda_risk,lambda_kd,train_dataset,num_epochsall,
         print(f"Epoch {epoch} starting...")
         logger.info(f"Epoch {epoch} starting...")
 
-        # 进行 machine unlearning
+        #  machine unlearning
         f_u, u, c_u = train_student_model_random(lambda_risk,lambda_kd,qf_100_loader, kd,test1_loader, tmodelmlp, modelmlp, smodelmlp, u, f_u)
         current_accuracy, accuracy1,f1 = test_model(test1_loader, qf_100_loader, kd, device, modelmlp,
                                                  smodelmlp, tmodelmlp, u, f_u)
@@ -158,9 +157,6 @@ def adaptforget(lambda_domain,lambda_risk,lambda_kd,train_dataset,num_epochsall,
         _t, pv, EMA_res, risk_score = api(device, smodelmlp, u, f_u, qf_100_loader, member_gt, cal_1000_loader,
                                           caltest1_loader)
         logger.info(f'Test value: {_t}, p-value: {pv}, EMA: {EMA_res}, Risk score: {risk_score}')
-        # tsnes(qf_100_loader, base2_loader, kd0_5_loader_no, smodelmlp, smodelmlp, smodelmlp, u, f_u, num)
-
-        # print(f'Test value: {_t}, p-value: {pv}, EMA: {EMA_res}, Risk score: {risk_score}')
 
 
         f_u = domainadaptation(f_u, c_u, qf_100_loader, kd0_5_loader_no,lambda_domain)
@@ -179,7 +175,6 @@ def adaptforget(lambda_domain,lambda_risk,lambda_kd,train_dataset,num_epochsall,
         average_kl_div_adapt1=calculate_kl_divergence(smodelmlp, best_model_state_retrained,smodelmlp_base2, qf_100_loader, device)
         print(f'>>average_kl_div_adapt1: {average_kl_div_adapt1}')
         logger.info(f'>>average_kl_div_adapt1: {average_kl_div_adapt1}')
-        # tsnes(qf_100_loader, base2_loader, kd0_5_loader_no, smodelmlp, smodelmlp, smodelmlp, u, f_u, num)
 
 
 
