@@ -20,7 +20,7 @@ conda env create --f environment.yaml
 # Dataset:
 
 We used seven datasets for testing, namely DermaMNIST, PathMNIST, RetinaMNIST, OCTMNIST, ASD, MDD, and Diabetes.
-All seven datasets used in this work are publicly available. The RetinaMNIST, OCTMNIST, DermaMNIST, and PathMNIST datasets are available at {https://medmnist.com/}. The ASD dataset can be accessed at {https://www.kaggle.com/datasets/fabdelja/autism-screening-for-toddlers}. The MDD dataset is stored at {https://physionet.org/content/mimiciii/1.4/}. The Diabetes dataset is stored at {https://www.kaggle.com/datasets/alexteboul/diabetes-health-indicators-dataset/data}.
+All seven datasets used in this work are publicly available. The RetinaMNIST, OCTMNIST, DermaMNIST, and PathMNIST datasets are available at https://medmnist.com. The ASD dataset can be accessed at https://www.kaggle.com/datasets/fabdelja/autism-screening-for-toddlers. The MDD dataset is stored at https://physionet.org/content/mimiciii/1.4. The Diabetes dataset is stored at https://www.kaggle.com/datasets/alexteboul/diabetes-health-indicators-dataset/data.
 
 
 
