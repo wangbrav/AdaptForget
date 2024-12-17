@@ -45,12 +45,9 @@ from torchvision import datasets, transforms
 # from tsne_mnist_tuo import tsne
 from tsne_mnist_guding1 import tsnet
 from tsne_mnist_guding2 import tsnes
-# 相比上一个  更改了 数据集的划分方法
-# TODO xiangbi shangyige  zengjia le  afs
 from qf1kosiam import analyze_sample_similarity
 
 from calculate_kl_divergence import calculate_kl_divergence
-# 加载npz文件
 import torch.nn.init as init
 #   afs
 from copy import deepcopy
@@ -100,13 +97,10 @@ from training_utils import *
 # from Model import get_teacher_model, get_student_model
 from utils_w import *
 from utils_ww import *
-# 设置日志记录 循环
 logging.basicConfig(filename='./tc/training_log_qf1circulate_asdv7.log', level=logging.INFO, format='%(asctime)s %(message)s')
 # logging.basicConfig(filename='./tc/pathtsne.log', level=logging.INFO, format='%(asctime)s %(message)s')
 # logging.basicConfig(filename='./tc/training_log_qf1circulate_pathmnistfinalv23.log', level=logging.INFO, format='%(asctime)s %(message)s')
 logger = logging.getLogger()
-
-#这里需要更改gt的大小
 # def afs(args,best_model_state_trained,best_model_state_retrained,base1_loader,base2_loader,test1_loader,cal_1000_loader,caltest1_loader,qf_100_loader,device):
 #     sys.path.append(args.root)
 #     best_model_state_afs = None
@@ -596,9 +590,7 @@ npz_file_path = '/root/autodl-tmp/wangbin/yiwang/data/pathmnist.npz'
 
 data = np.load(npz_file_path)
 
-print(list(data.keys()))  # 打印所有在npz文件中的数组名
 
-# ['train_images', 'val_images', 'test_images', 'train_labels', 'val_labels', 'test_labels']
 images = data['train_images']
 labels = data['train_labels']
 
@@ -622,7 +614,7 @@ def set_seed(seed=32):
     torch.manual_seed(seed)
     if torch.cuda.is_available():
         torch.cuda.manual_seed(seed)
-        torch.cuda.manual_seed_all(seed)  # 如果有多个GPU
+        torch.cuda.manual_seed_all(seed)
     torch.backends.cudnn.deterministic = True
     torch.backends.cudnn.benchmark = False
 # set_seed(82)
@@ -653,7 +645,7 @@ class PathMNISTDataset(Dataset):
     # def shuffle_data(self, seed=32):
     def shuffle_data(self, seed=62):
         # 设置随机种子以确保打乱顺序的一致性
-        print(f"Shuffling data with seed {seed}") # 这里的seed是一个局部变量 有没有都可以 做的实验是这样的
+        print(f"Shuffling data with seed {seed}")
         # logger.info(f"Shuffling data with seed {seed}")
 
         np.random.seed(seed)
@@ -661,13 +653,10 @@ class PathMNISTDataset(Dataset):
         np.random.shuffle(indices)
         self.images = self.original_images[indices]
         self.labels = self.original_labels[indices]
-        # 如果提供了转换函数，对每个图像进行转换
         # if self.transform:
-        #     # 逐个图像应用转换
         #     self.images = np.array([self.transform(image) for image in self.images])
 
     def get_labels(self, indices):
-            # 返回指定索引的标签列表
             return [self.labels[i] for i in indices]
 
 
@@ -867,35 +856,30 @@ class ExpandToRGB:
             tensor = tensor.repeat(3, 1, 1)
         return tensor
 def add_salt_and_pepper_noise(img):
-    """
-    向图像添加盐椒噪声
-    img: Tensor图像
-    """
-    # 设定噪声比例
-    amount = 0.1  # 噪声占图像比例
-    # 0.005
-    salt_vs_pepper = 0.5  # 盐和椒的比例
+
+    amount = 0.1  #
+
+    salt_vs_pepper = 0.5
     num_salt = np.ceil(amount * img.numel() * salt_vs_pepper)
     num_pepper = np.ceil(amount * img.numel() * (1.0 - salt_vs_pepper))
 
-    # 添加盐噪声
+
     indices = torch.randperm(img.numel())[:int(num_salt)]
     img.view(-1)[indices] = 1
 
-    # 添加椒噪声
     indices = torch.randperm(img.numel())[:int(num_pepper)]
     img.view(-1)[indices] = 0
 
     return img
 transform = transforms.Compose([
     transforms.ToTensor(),
-    ExpandToRGB(),  # 确保这个转换在ToTensor之后
+    ExpandToRGB(),
     transforms.Normalize((0.5, 0.5, 0.5), (0.5, 0.5, 0.5))
 ])
 notransform = transforms.Compose([
     transforms.ToTensor(),
     transforms.Resize(28),
-    ExpandToRGB(),  # 确保这个转换在ToTensor之后
+    ExpandToRGB(),
     transforms.Normalize((0.5, 0.5, 0.5), (0.5, 0.5, 0.5))
 ])
 transform_no_salt_pepper = transforms.Compose([
@@ -926,32 +910,28 @@ test_dataset = PathMNISTDataset(images_test, labels_test, transform=transform)
 # plot_images_per_class(train_dataset, 9)
 cifar_dataset =noPathMNISTDataset(dataset_type='cifar10', transform=notransform)
 cifar_dataset.shuffle_data(seed=42)
-train_dataset.shuffle_data()  # 使用固定种子打乱数据
+train_dataset.shuffle_data()
 
 train_dataset_no = PathMNISTDataset(images, labels, transform=transform_no_salt_pepper)
 import os
 import matplotlib.pyplot as plt
 
-# 创建保存图片的文件夹
 output_dir = 'output_images'
 if not os.path.exists(output_dir):
     os.makedirs(output_dir)
 
-# 选择要输出的图片数量
 num_images_to_save = 5
 
-# 保存图片
+
 for i in range(num_images_to_save):
     image, label = train_dataset_no[i]
-    # 如果图像是tensor，可能需要将通道从(C, H, W)转换为(H, W, C)格式
-    image = image.permute(1, 2, 0)  # 将 (C, H, W) 转换为 (H, W, C) 格式
-    plt.imshow(image)  # 显示彩色图像
+    image = image.permute(1, 2, 0)
+    plt.imshow(image)
     plt.title(f'Label: {label}')
     plt.axis('off')
-    plt.savefig(f'{output_dir}/image_{i}.png')  # 保存图片
+    plt.savefig(f'{output_dir}/image_{i}.png')
     plt.close()
 
-print(f'已保存 {num_images_to_save} 张彩色图片到 {output_dir} 文件夹中。')
 
 train_dataset_no.shuffle_data()
 base1_indices = CONFIG['BASE1']['BASE']
@@ -992,10 +972,8 @@ qno_10_loader = DataLoader(Subset(train_dataset, CONFIG['QNO_10']['QUERY']), bat
 
 qf_100_loader_noise = DataLoader(Subset(train_dataset_no, CONFIG['QF_100']['QUERY']), batch_size=32, shuffle=True,
                                  generator=torch.Generator().manual_seed(random_seed))
-# 创建十个 Subset 的副本
 subsets = [Subset(train_dataset, CONFIG['QF_100']['QUERY']) for _ in range(10)]
 concat_dataset = ConcatDataset(subsets)
-# 使用 ConcatDataset 创建 DataLoader
 qf_100_loader10 = DataLoader(
     concat_dataset,
     batch_size=64,
@@ -1058,191 +1036,171 @@ optimizer = torch.optim.Adam(model.parameters(), lr=learning_rate)
 optimizer_strained = torch.optim.Adam(model_strained.parameters(), lr=learning_rate)
 optimizer_s = torch.optim.Adam(model_s.parameters(), lr=learning_rate)
 
-# for epoch in range(epochs):
-#     model_strained.train()
-#     correct = 0
-#     train_loss = 0
-#
-#     with tqdm(total=len(kd0_75_loader)) as t:
-#         for X, Y in tqdm(kd0_75_loader):
-#             X = X.to(device)
-#             Y = Y.to(device)
-#             # Training pass
-#             optimizer_strained.zero_grad()
-#             # optimizer.zero_grad()
-#             # output = model(X)
-#             output = model_strained(X)
-#             # print(output)
-#             # output = torch.argmax(output, dim=1)
-#             # print(output.shape)
-#             # print(output)
-#             # print(Y.shape)
-#             # print(Y)
-#             # Y = Y.squeeze(1)
-#             # print(Yield.shape)
-#             # print(Y)
-#             Y = Y.squeeze(1).long()
-#             # print("Model output shape:", output.shape)
-#             # print("Target labels:", Y.unique())
-#             loss = criterion(output, Y)
-#             loss.backward()
-#             train_loss += loss.item()
-#             # optimizer.step()
-#             optimizer_strained.step()
-#             pred = output.data.max(1)[1]
-#             correct += pred.eq(Y.view(-1)).sum().item()
-#     train_loss /= len(base1_loader.dataset)
-#     train_accuracy = 100 * correct / len(base1_loader.dataset)
-#     print(f"Train Loss: {train_loss:.4f}, Train Accuracy: {train_accuracy:.2f}%")
-#     # best_model_state_strained_zui = model.state_dict().copy()
-#     best_model_state_strained_zui = model_strained.state_dict().copy()
-#     save_dir = "./quanzhong/"
-#     save_path_strained_zui = os.path.join(save_dir, "best_strained_test_zui1.pth")
-#     torch.save(best_model_state_strained_zui, save_path_strained_zui)
-#
-#     # test_accuracy,f1 = test(model, test1_loader, device)
-#     test_accuracy,f1 = test(model_strained, test1_loader, device)
-#     print(f"Test Accuracy: {test_accuracy:.2f}%")
-#     print(f1)
-#     logger.info(f"Test Accuracy: {test_accuracy:.2f}%")
-#     logger.info(f"f1: {f1}")
-#     if test_accuracy > best_accuracy_strained:
-#         best_accuracy_strained = test_accuracy
-#         logger.info(f"Saving best model with accuracy {best_accuracy_strained}")
-#         # best_model_state_strained = model.state_dict().copy()
-#         best_model_state_strained = model_strained.state_dict().copy()
-#         # f_u=model.feature_extractor.state_dict()
-#         f_u=model_strained.feature_extractor.state_dict()
-#
-#         save_dir = "./quanzhong/"
-#
-#         if not os.path.exists(save_dir):
-#             os.makedirs(save_dir)
-#
-#         save_path_strained = os.path.join(save_dir, "best_strained_test1.pth")
-#         # average_euclidean_adapt, average_manhattan_adapt, average_cosine_similarity_adapt = analyze_sample_similarity(model, best_model_state_strained,
-#         #     device,  train_dataset, CONFIG)
-#         average_euclidean_adapt, average_manhattan_adapt, average_cosine_similarity_adapt = analyze_sample_similarity(model_strained, best_model_state_strained,
-#             device,  train_dataset, CONFIG)
-#         print(f'>>average_euclidean_adapt: {average_euclidean_adapt}, average_manhattan_adapt: {average_manhattan_adapt}, average_cosine_similarity_adapt: {average_cosine_similarity_adapt}')
-#         logger.info(f'>>average_euclidean_adapt: {average_euclidean_adapt}, average_manhattan_adapt: {average_manhattan_adapt}, average_cosine_similarity_adapt: {average_cosine_similarity_adapt}')
-#         member_gt = [1 for _ in range(1000)]
-#
-#         _t, pv, EMA_res, risk_score = api(device, model_strained, best_model_state_strained, f_u, qf_1000_loader, member_gt, cal_1000_loader,
-#                                           caltest1_loader)
-#         # _t, pv, EMA_res, risk_score = api(device, model, best_model_state_strained, f_u, qf_1000_loader, member_gt, cal_1000_loader,
-#         #                                   caltest1_loader)
-#         print(f'Test value: {_t}, p-value: {pv}, EMA: {EMA_res}, Risk score: {risk_score}')
-#         logger.info(f'Test value: {_t}, p-value: {pv}, EMA: {EMA_res}, Risk score: {risk_score}')
-#         torch.save(best_model_state_strained, save_path_strained)
-#         logger.info(f"Model weights saved successfully to {save_path_strained}.")
+for epoch in range(epochs):
+    model_strained.train()
+    correct = 0
+    train_loss = 0
 
-# for epoch in range(epochs):
-#     model.train()
-#     correct = 0
-#     train_loss = 0
-#
-#     with tqdm(total=len(base1_loader)) as t:
-#         for X, Y in tqdm(base1_loader):
-#             X = X.to(device)
-#             Y = Y.to(device)
-#             # Training pass
-#             optimizer.zero_grad()
-#             output = model(X)
-#             # print(output)
-#             # output = torch.argmax(output, dim=1)
-#             # print(output.shape)
-#             # print(output)
-#             # print(Y.shape)
-#             # print(Y)
-#             # Y = Y.squeeze(1)
-#             # print(Yield.shape)
-#             # print(Y)
-#             Y = Y.squeeze(1).long()
-#             # print("Model output shape:", output.shape)
-#             # print("Target labels:", Y.unique())
-#             loss = criterion(output, Y)
-#             loss.backward()
-#             train_loss += loss.item()
-#             optimizer.step()
-#             pred = output.data.max(1)[1]
-#             correct += pred.eq(Y.view(-1)).sum().item()
-#
-#     train_loss /= len(base1_loader.dataset)
-#     train_accuracy = 100 * correct / len(base1_loader.dataset)
-#     print(f"Train Loss: {train_loss:.4f}, Train Accuracy: {train_accuracy:.2f}%")
-#
-#     test_accuracy = test(model, test1_loader, device)
-#     print(f"Test Accuracy: {test_accuracy:.2f}%")
-#     if test_accuracy > best_accuracy:
-#         best_accuracy = test_accuracy
-#         logger.info(f"Saving best model with accuracy {best_accuracy}")
-#         best_model_state_trained = model.state_dict().copy()
-#         save_dir = "./quanzhong/"
-#         if not os.path.exists(save_dir):
-#             os.makedirs(save_dir)
-#         save_path_trained = os.path.join(save_dir, "best_trained_test.pth")
-#         torch.save(best_model_state_trained, save_path_trained)
-#         logger.info(f"Model weights saved successfully to {save_path_trained}.")
+    with tqdm(total=len(kd0_75_loader)) as t:
+        for X, Y in tqdm(kd0_75_loader):
+            X = X.to(device)
+            Y = Y.to(device)
+            # Training pass
+            optimizer_strained.zero_grad()
+            # optimizer.zero_grad()
+            # output = model(X)
+            output = model_strained(X)
+            # output = torch.argmax(output, dim=1)
+            # Y = Y.squeeze(1)
+            Y = Y.squeeze(1).long()
+            loss = criterion(output, Y)
+            loss.backward()
+            train_loss += loss.item()
+            # optimizer.step()
+            optimizer_strained.step()
+            pred = output.data.max(1)[1]
+            correct += pred.eq(Y.view(-1)).sum().item()
+    train_loss /= len(base1_loader.dataset)
+    train_accuracy = 100 * correct / len(base1_loader.dataset)
+    print(f"Train Loss: {train_loss:.4f}, Train Accuracy: {train_accuracy:.2f}%")
+    # best_model_state_strained_zui = model.state_dict().copy()
+    best_model_state_strained_zui = model_strained.state_dict().copy()
+    save_dir = "./weights/"
+    save_path_strained_zui = os.path.join(save_dir, "best_strained_test_zui.pth")
+    torch.save(best_model_state_strained_zui, save_path_strained_zui)
 
-# for epoch in range(epochs):
-#     model_s.train()
-#     correct = 0
-#     train_loss = 0
-#
-#     with tqdm(total=len(base2_loader)) as t:
-#         for X, Y in tqdm(base2_loader):
-#             X = X.to(device)
-#             Y = Y.to(device)
-#             # Training pass
-#             optimizer_s.zero_grad()
-#             output = model_s(X)
-#             # print(output)
-#             # output = torch.argmax(output, dim=1)
-#             # print(output.shape)
-#             # print(output)
-#             # print(Y.shape)
-#             # print(Y)
-#             # Y = Y.squeeze(1)
-#             # print(Yield.shape)
-#             # print(Y)
-#             Y = Y.squeeze(1).long()
-#             # print("Model output shape:", output.shape)
-#             # print("Target labels:", Y.unique())
-#             loss = criterion(output, Y)
-#             loss.backward()
-#             train_loss += loss.item()
-#             optimizer_s.step()
-#             pred = output.data.max(1)[1]
-#             correct += pred.eq(Y.view(-1)).sum().item()
-#
-#     train_loss /= len(base2_loader.dataset)
-#     train_accuracy = 100 * correct / len(base2_loader.dataset)
-#     print(f"Train Loss: {train_loss:.4f}, Train Accuracy: {train_accuracy:.2f}%")
-#
-#     test_accuracy = test(model_s, test1_loader, device)
-#     print(f"Test Accuracy: {test_accuracy:.2f}%")
-#
-#     if test_accuracy > best_accuracy_s:
-#         best_accuracy_s = test_accuracy
-#         logger.info(f"Saving retrained best model with accuracy {best_accuracy_s}")
-#         best_model_state_retrained = model_s.state_dict().copy()
-#         u = best_model_state_retrained
-#         save_dir = "./quanzhong/"
-#
-#         if not os.path.exists(save_dir):
-#             os.makedirs(save_dir)
-#         save_path_retrained = os.path.join(save_dir, "best_retrained_test.pth")
-#         torch.save(best_model_state_retrained, save_path_retrained)
-#         logger.info(f"Model weights saved successfully to {save_path_retrained}.")
-#
-#         # average_euclidean_retrained, average_manhattan_retrained, average_cosine_similarity_retrained = analyze_sample_similarity(model_s, u,
-#         #                                                                                                         device,
-#         #                                                                                                         train_dataset,
-#         #                                                                                                         CONFIG)
-#         # print(f'>>average_euclidean_retrained: {average_euclidean_retrained}, average_manhattan_retrained: {average_manhattan_retrained}, average_cosine_similarity_retrained: {average_cosine_similarity_retrained}')
-#         # logger.info(f'>>average_euclidean_retrained: {average_euclidean_retrained}, average_manhattan_retrained: {average_manhattan_retrained}, average_cosine_similarity_retrained: {average_cosine_similarity_retrained}')
-#         #
+    # test_accuracy,f1 = test(model, test1_loader, device)
+    test_accuracy,f1 = test(model_strained, test1_loader, device)
+    print(f"Test Accuracy: {test_accuracy:.2f}%")
+    print(f1)
+    logger.info(f"Test Accuracy: {test_accuracy:.2f}%")
+    logger.info(f"f1: {f1}")
+    if test_accuracy > best_accuracy_strained:
+        best_accuracy_strained = test_accuracy
+        logger.info(f"Saving best model with accuracy {best_accuracy_strained}")
+        # best_model_state_strained = model.state_dict().copy()
+        best_model_state_strained = model_strained.state_dict().copy()
+        # f_u=model.feature_extractor.state_dict()
+        f_u=model_strained.feature_extractor.state_dict()
+
+        save_dir = "./weights/"
+
+        if not os.path.exists(save_dir):
+            os.makedirs(save_dir)
+
+        save_path_strained = os.path.join(save_dir, "best_strained_test.pth")
+        # average_euclidean_adapt, average_manhattan_adapt, average_cosine_similarity_adapt = analyze_sample_similarity(model, best_model_state_strained,
+        #     device,  train_dataset, CONFIG)
+        average_euclidean_adapt, average_manhattan_adapt, average_cosine_similarity_adapt = analyze_sample_similarity(model_strained, best_model_state_strained,
+            device,  train_dataset, CONFIG)
+        print(f'>>average_euclidean_adapt: {average_euclidean_adapt}, average_manhattan_adapt: {average_manhattan_adapt}, average_cosine_similarity_adapt: {average_cosine_similarity_adapt}')
+        logger.info(f'>>average_euclidean_adapt: {average_euclidean_adapt}, average_manhattan_adapt: {average_manhattan_adapt}, average_cosine_similarity_adapt: {average_cosine_similarity_adapt}')
+        member_gt = [1 for _ in range(1000)]
+
+        _t, pv, EMA_res, risk_score = api(device, model_strained, best_model_state_strained, f_u, qf_1000_loader, member_gt, cal_1000_loader,
+                                          caltest1_loader)
+        # _t, pv, EMA_res, risk_score = api(device, model, best_model_state_strained, f_u, qf_1000_loader, member_gt, cal_1000_loader,
+        #                                   caltest1_loader)
+        print(f'Test value: {_t}, p-value: {pv}, EMA: {EMA_res}, Risk score: {risk_score}')
+        logger.info(f'Test value: {_t}, p-value: {pv}, EMA: {EMA_res}, Risk score: {risk_score}')
+        torch.save(best_model_state_strained, save_path_strained)
+        logger.info(f"Model weights saved successfully to {save_path_strained}.")
+
+for epoch in range(epochs):
+    model.train()
+    correct = 0
+    train_loss = 0
+
+    with tqdm(total=len(base1_loader)) as t:
+        for X, Y in tqdm(base1_loader):
+            X = X.to(device)
+            Y = Y.to(device)
+            # Training pass
+            optimizer.zero_grad()
+            output = model(X)
+            # output = torch.argmax(output, dim=1)
+
+            # Y = Y.squeeze(1)
+
+            Y = Y.squeeze(1).long()
+
+            loss = criterion(output, Y)
+            loss.backward()
+            train_loss += loss.item()
+            optimizer.step()
+            pred = output.data.max(1)[1]
+            correct += pred.eq(Y.view(-1)).sum().item()
+
+    train_loss /= len(base1_loader.dataset)
+    train_accuracy = 100 * correct / len(base1_loader.dataset)
+    print(f"Train Loss: {train_loss:.4f}, Train Accuracy: {train_accuracy:.2f}%")
+
+    test_accuracy = test(model, test1_loader, device)
+    print(f"Test Accuracy: {test_accuracy:.2f}%")
+    if test_accuracy > best_accuracy:
+        best_accuracy = test_accuracy
+        logger.info(f"Saving best model with accuracy {best_accuracy}")
+        best_model_state_trained = model.state_dict().copy()
+        save_dir = "./weights/"
+        if not os.path.exists(save_dir):
+            os.makedirs(save_dir)
+        save_path_trained = os.path.join(save_dir, "best_trained_test.pth")
+        torch.save(best_model_state_trained, save_path_trained)
+        logger.info(f"Model weights saved successfully to {save_path_trained}.")
+
+for epoch in range(epochs):
+    model_s.train()
+    correct = 0
+    train_loss = 0
+
+    with tqdm(total=len(base2_loader)) as t:
+        for X, Y in tqdm(base2_loader):
+            X = X.to(device)
+            Y = Y.to(device)
+            optimizer_s.zero_grad()
+            output = model_s(X)
+            # output = torch.argmax(output, dim=1)
+            # Y = Y.squeeze(1)
+            Y = Y.squeeze(1).long()
+
+            loss = criterion(output, Y)
+            loss.backward()
+            train_loss += loss.item()
+            optimizer_s.step()
+            pred = output.data.max(1)[1]
+            correct += pred.eq(Y.view(-1)).sum().item()
+
+    train_loss /= len(base2_loader.dataset)
+    train_accuracy = 100 * correct / len(base2_loader.dataset)
+    print(f"Train Loss: {train_loss:.4f}, Train Accuracy: {train_accuracy:.2f}%")
+
+    test_accuracy = test(model_s, test1_loader, device)
+    print(f"Test Accuracy: {test_accuracy:.2f}%")
+
+    if test_accuracy > best_accuracy_s:
+        best_accuracy_s = test_accuracy
+        logger.info(f"Saving retrained best model with accuracy {best_accuracy_s}")
+        best_model_state_retrained = model_s.state_dict().copy()
+        u = best_model_state_retrained
+        save_dir = "./weights/"
+
+        if not os.path.exists(save_dir):
+            os.makedirs(save_dir)
+        save_path_retrained = os.path.join(save_dir, "best_retrained_test.pth")
+        torch.save(best_model_state_retrained, save_path_retrained)
+        logger.info(f"Model weights saved successfully to {save_path_retrained}.")
+
+        # average_euclidean_retrained, average_manhattan_retrained, average_cosine_similarity_retrained = analyze_sample_similarity(model_s, u,
+        #                                                                                                         device,
+        #                                                                                                         train_dataset,
+        #                                                                                                         CONFIG)
+        # print(f'>>average_euclidean_retrained: {average_euclidean_retrained}, average_manhattan_retrained: {average_manhattan_retrained}, average_cosine_similarity_retrained: {average_cosine_similarity_retrained}')
+        # logger.info(f'>>average_euclidean_retrained: {average_euclidean_retrained}, average_manhattan_retrained: {average_manhattan_retrained}, average_cosine_similarity_retrained: {average_cosine_similarity_retrained}')
+        #
+'''
+Comment question
+'''
+
 
 # def adaptforget(num_epochsall, device, qf_100_loader, kd0_5_loader, test1_loader, cal_1000_loader,
 #                                caltest1_loader, best_model_state_retrained, best_model_state_trained):
@@ -1263,11 +1221,10 @@ optimizer_s = torch.optim.Adam(model_s.parameters(), lr=learning_rate)
 #     best_accuracy = 0.0
 #
 #     for epoch in range(num_epochsall):
-#         # print(f"Epoch {epoch} starting...")
 #         print(f"Epoch {epoch} starting...")
 #         logger.info(f"Epoch {epoch} starting...")
 #
-#         # 进行 machine unlearning
+#         # machine unlearning
 #         f_u, u, c_u = train_student_model_random(qf_100_loader, base1_loader,test1_loader, tmodelmlp, modelmlp, smodelmlp, u, f_u)
 #         current_accuracy, accuracy1 = test_model(test1_loader, qf_100_loader, kd0_5_loader, device, modelmlp,
 #                                                  smodelmlp, tmodelmlp, u, f_u)
@@ -1297,7 +1254,7 @@ optimizer_s = torch.optim.Adam(model_s.parameters(), lr=learning_rate)
 #         print(f'ad test value: {_t}, p_value: {pv}, ema: {EMA_res}, risk_score: {risk_score}')
 #         # print(f'ad test value: {_t}, p_value: {pv}, ema: {EMA_res}, risk_score: {risk_score}')
 #         logger.info(f'ad test value: {_t}, p_value: {pv}, ema: {EMA_res}, risk_score: {risk_score}')
-
+#
 # def instance(base1_dataset, base1_indices,test1_loader,best_model_state_retrained,best_model_state_strained,cal_1000_loader,caltest1_loader,qf_1_indices,CONFIG):
 #     # Training settings
 #     parser = argparse.ArgumentParser(description='PyTorch MNIST Example')
@@ -1364,7 +1321,7 @@ optimizer_s = torch.optim.Adam(model_s.parameters(), lr=learning_rate)
 #     D_r_acc = []
 #     D_f_acc = []
 #     D_test_acc = []
-
+#
 #     case1_D_r = []
 #     case2_D_r = []
 #     case3_D_r = []
@@ -1942,7 +1899,7 @@ optimizer_s = torch.optim.Adam(model_s.parameters(), lr=learning_rate)
 #         case3_D_test.append(test_acc)
 #         case3_D_r.append(other_acc)
 #         case3_D_f.append(unlearn_acc)
-
+#
 # def train_and_forget(network,base2_loader,test1_loader ,best_model_state_strained,best_model_state_retrained, dataset, classes,qf_1_dataset, qf_1_loader,base2_dataset , method,gpu,train_dataset,CONFIG):
 #     # batch_size = args.b
 #
@@ -1984,7 +1941,7 @@ optimizer_s = torch.optim.Adam(model_s.parameters(), lr=learning_rate)
 #     #     trainset, [args.forget_perc, 1 - args.forget_perc]
 #     # )
 #
-
+#
 #     # forget_train_dl = DataLoader(list(forget_train), batch_size=128)
 #
 #     forget_train_dl = qf_1_loader
@@ -1995,7 +1952,7 @@ optimizer_s = torch.optim.Adam(model_s.parameters(), lr=learning_rate)
 #     forget_valid_dl = forget_train_dl
 #     retain_valid_dl = base2_loader
 #     # retain_valid_dl = validloader
-
+#
 #     # Change alpha here as described in the paper
 #     model_size_scaler = 1
 #     if net == "ViT":
@@ -2064,73 +2021,77 @@ optimizer_s = torch.optim.Adam(model_s.parameters(), lr=learning_rate)
 #     #     }
 #     # )
 
-# for qf1_start in range(9005, 9999):
-#     # best_model_state_retrained =torch.load('/root/autodl-tmp/wangbin/yiwang/afsandadapt/quanzhong/best_retrained_di.pth')
-#     # best_model_state_retrained =torch.load('/root/autodl-tmp/wangbin/yiwang/afsandadapt/quanzhong/best_retrained.pth')
-#     best_model_state_retrained =torch.load('/root/autodl-tmp/wangbin/yiwang/afsandadapt/quanzhong/best_retrained_test.pth')
-#     # best_model_state_strained=torch.load('/root/autodl-tmp/wangbin/yiwang/afsandadapt/quanzhong/best_strained_di.pth')
-#     # best_model_state_strained=torch.load('/root/autodl-tmp/wangbin/yiwang/afsandadapt/quanzhong/best_strained.pth')
-#     best_model_state_strained=torch.load('/root/autodl-tmp/wangbin/yiwang/afsandadapt/quanzhong/best_strained_test_zui.pth')
-#     # best_model_state_trained = torch.load('/root/autodl-tmp/wangbin/yiwang/afsandadapt/quanzhong/best_trained_di.pth')
-#     # best_model_state_trained = torch.load('/root/autodl-tmp/wangbin/yiwang/afsandadapt/quanzhong/best_trained.pth')
-#     best_model_state_trained = torch.load('/root/autodl-tmp/wangbin/yiwang/afsandadapt/quanzhong/best_trained_test.pth')
-#     u11=best_model_state_retrained
-#     logger.info(f'>>qf1_start: {qf1_start}')
-#     qf1_end = qf1_start + 1  # 修改为您希望的大小
-#     CONFIG['QF1'] = {
-#         'QUERY': list(range(qf1_start, qf1_end)),
-#         'QUERY_MEMBER': [1 for _ in range(qf1_end - qf1_start)]
-#     }
-#     qf_1_indices = CONFIG['QF1']['QUERY']
-#     qf_1_dataset = Subset(train_dataset, qf_1_indices)
-#     qf1_loader = DataLoader(Subset(train_dataset, CONFIG['QF1']['QUERY']), batch_size=32, shuffle=False)
-#     average_euclidean_retrained, average_manhattan_retrained, average_cosine_similarity_retrained = analyze_sample_similarity(
-#         model_s, u11,
-#         device,
-#         train_dataset,
-#         CONFIG)
-#     print(
-#         f'>>average_euclidean_retrained: {average_euclidean_retrained}, average_manhattan_retrained: {average_manhattan_retrained}, average_cosine_similarity_retrained: {average_cosine_similarity_retrained}')
-#     logger.info(
-#         f'>>average_euclidean_retrained: {average_euclidean_retrained}, average_manhattan_retrained: {average_manhattan_retrained}, average_cosine_similarity_retrained: {average_cosine_similarity_retrained}')
-#
-#     network = 'resnet18'
-#     dataset = 'cifar10'
-#     method = 'ssd_tuning'
-#     classes = 9
-#     train_and_forget(network,kd0_5_loader,test1_loader, best_model_state_strained, best_model_state_retrained, dataset, classes, qf_1_dataset,qf1_loader, base2_dataset, method, gpu=True,train_dataset=train_dataset,CONFIG=CONFIG,cal_1000_loader=cal_1000_loader,caltest1_loader=caltest1_loader)
-#     method = 'amnesiac'
-#
-#     train_and_forget(network,kd0_5_loader,test1_loader, best_model_state_strained, best_model_state_retrained, dataset, classes, qf_1_dataset,qf1_loader, base2_dataset, method, gpu=True,train_dataset=train_dataset,CONFIG=CONFIG,cal_1000_loader=cal_1000_loader,caltest1_loader=caltest1_loader)
-#     #
-#     method = 'blindspot'
-#     train_and_forget(network, kd0_5_loader,test1_loader,best_model_state_strained, best_model_state_retrained, dataset, classes, qf_1_dataset,qf1_loader, base2_dataset, method, gpu=True,train_dataset=train_dataset,CONFIG=CONFIG,cal_1000_loader=cal_1000_loader,caltest1_loader=caltest1_loader)
-#
-#     method = 'FisherForgetting'
-#     train_and_forget(network, kd0_5_loader,test1_loader,best_model_state_strained, best_model_state_retrained, dataset, classes, qf_1_dataset,qf1_loader, base2_dataset, method, gpu=True,train_dataset=train_dataset,CONFIG=CONFIG,cal_1000_loader=cal_1000_loader,caltest1_loader=caltest1_loader)
-#
-#
-#     subset_indices = base1_indices  # 获取 Subset 的索引
-#     train_labels = PathMNISTDataset.get_labels(train_dataset, subset_indices)
-#     instance(base1_dataset, base1_indices, test1_loader, best_model_state_retrained, best_model_state_strained,cal_1000_loader, caltest1_loader, qf_1_indices,CONFIG,train_labels=train_labels,train_dataset=train_dataset)
-#     adaptforget(
-#         train_dataset=train_dataset,
-#         num_epochsall=60,
-#         device=device,
-#         qf_100_loader=qf1_loader,
-#         kd=base2_loader,
-#         test1_loader=test1_loader,
-#         cal_1000_loader=cal_1000_loader,
-#         caltest1_loader=caltest1_loader,
-#         best_model_state_retrained=best_model_state_retrained,
-#         best_model_state_trained=best_model_state_trained,
-#         CONFIG=CONFIG,
-#         kd0_5_loader_no=kd0_5_loader_no,
-#     )
-#     args = parser()
-#     afs(args,best_model_state_trained,best_model_state_retrained,base2_loader,base2_loader,test1_loader,cal_1000_loader,caltest1_loader,qf1_loader,device,train_dataset,CONFIG)
-# best_model_state_retrained =torch.load('/root/autodl-tmp/wangbin/yiwang/afsandadapt/quanzhong/best_retrained_di.pth')
-# best_model_state_retrained =torch.load('/root/autodl-tmp/wangbin/yiwang/afsandadapt/quanzhong/best_retrained.pth')
+
+'''
+Comment question
+'''
+for qf1_start in range(9005, 9999):
+    # best_model_state_retrained =torch.load('/root/autodl-tmp/wangbin/yiwang/afsandadapt/quanzhong/best_retrained_di.pth')
+    # best_model_state_retrained =torch.load('/root/autodl-tmp/wangbin/yiwang/afsandadapt/quanzhong/best_retrained.pth')
+    best_model_state_retrained =torch.load('/root/autodl-tmp/wangbin/yiwang/afsandadapt/quanzhong/best_retrained_test.pth')
+    # best_model_state_strained=torch.load('/root/autodl-tmp/wangbin/yiwang/afsandadapt/quanzhong/best_strained_di.pth')
+    # best_model_state_strained=torch.load('/root/autodl-tmp/wangbin/yiwang/afsandadapt/quanzhong/best_strained.pth')
+    best_model_state_strained=torch.load('/root/autodl-tmp/wangbin/yiwang/afsandadapt/quanzhong/best_strained_test_zui.pth')
+    # best_model_state_trained = torch.load('/root/autodl-tmp/wangbin/yiwang/afsandadapt/quanzhong/best_trained_di.pth')
+    # best_model_state_trained = torch.load('/root/autodl-tmp/wangbin/yiwang/afsandadapt/quanzhong/best_trained.pth')
+    best_model_state_trained = torch.load('/root/autodl-tmp/wangbin/yiwang/afsandadapt/quanzhong/best_trained_test.pth')
+    u11=best_model_state_retrained
+    logger.info(f'>>qf1_start: {qf1_start}')
+    qf1_end = qf1_start + 1  # 修改为您希望的大小
+    CONFIG['QF1'] = {
+        'QUERY': list(range(qf1_start, qf1_end)),
+        'QUERY_MEMBER': [1 for _ in range(qf1_end - qf1_start)]
+    }
+    qf_1_indices = CONFIG['QF1']['QUERY']
+    qf_1_dataset = Subset(train_dataset, qf_1_indices)
+    qf1_loader = DataLoader(Subset(train_dataset, CONFIG['QF1']['QUERY']), batch_size=32, shuffle=False)
+    average_euclidean_retrained, average_manhattan_retrained, average_cosine_similarity_retrained = analyze_sample_similarity(
+        model_s, u11,
+        device,
+        train_dataset,
+        CONFIG)
+    print(
+        f'>>average_euclidean_retrained: {average_euclidean_retrained}, average_manhattan_retrained: {average_manhattan_retrained}, average_cosine_similarity_retrained: {average_cosine_similarity_retrained}')
+    logger.info(
+        f'>>average_euclidean_retrained: {average_euclidean_retrained}, average_manhattan_retrained: {average_manhattan_retrained}, average_cosine_similarity_retrained: {average_cosine_similarity_retrained}')
+
+    network = 'resnet18'
+    dataset = 'cifar10'
+    method = 'ssd_tuning'
+    classes = 9
+    train_and_forget(network,kd0_5_loader,test1_loader, best_model_state_strained, best_model_state_retrained, dataset, classes, qf_1_dataset,qf1_loader, base2_dataset, method, gpu=True,train_dataset=train_dataset,CONFIG=CONFIG,cal_1000_loader=cal_1000_loader,caltest1_loader=caltest1_loader)
+    method = 'amnesiac'
+
+    train_and_forget(network,kd0_5_loader,test1_loader, best_model_state_strained, best_model_state_retrained, dataset, classes, qf_1_dataset,qf1_loader, base2_dataset, method, gpu=True,train_dataset=train_dataset,CONFIG=CONFIG,cal_1000_loader=cal_1000_loader,caltest1_loader=caltest1_loader)
+    #
+    method = 'blindspot'
+    train_and_forget(network, kd0_5_loader,test1_loader,best_model_state_strained, best_model_state_retrained, dataset, classes, qf_1_dataset,qf1_loader, base2_dataset, method, gpu=True,train_dataset=train_dataset,CONFIG=CONFIG,cal_1000_loader=cal_1000_loader,caltest1_loader=caltest1_loader)
+
+    method = 'FisherForgetting'
+    train_and_forget(network, kd0_5_loader,test1_loader,best_model_state_strained, best_model_state_retrained, dataset, classes, qf_1_dataset,qf1_loader, base2_dataset, method, gpu=True,train_dataset=train_dataset,CONFIG=CONFIG,cal_1000_loader=cal_1000_loader,caltest1_loader=caltest1_loader)
+
+
+    subset_indices = base1_indices  # 获取 Subset 的索引
+    train_labels = PathMNISTDataset.get_labels(train_dataset, subset_indices)
+    instance(base1_dataset, base1_indices, test1_loader, best_model_state_retrained, best_model_state_strained,cal_1000_loader, caltest1_loader, qf_1_indices,CONFIG,train_labels=train_labels,train_dataset=train_dataset)
+    adaptforget(
+        train_dataset=train_dataset,
+        num_epochsall=60,
+        device=device,
+        qf_100_loader=qf1_loader,
+        kd=base2_loader,
+        test1_loader=test1_loader,
+        cal_1000_loader=cal_1000_loader,
+        caltest1_loader=caltest1_loader,
+        best_model_state_retrained=best_model_state_retrained,
+        best_model_state_trained=best_model_state_trained,
+        CONFIG=CONFIG,
+        kd0_5_loader_no=kd0_5_loader_no,
+    )
+    args = parser()
+    afs(args,best_model_state_trained,best_model_state_retrained,base2_loader,base2_loader,test1_loader,cal_1000_loader,caltest1_loader,qf1_loader,device,train_dataset,CONFIG)
+best_model_state_retrained =torch.load('/root/autodl-tmp/wangbin/yiwang/afsandadapt/quanzhong/best_retrained_di.pth')
+best_model_state_retrained =torch.load('/root/autodl-tmp/wangbin/yiwang/afsandadapt/quanzhong/best_retrained.pth')
 best_model_state_retrained =torch.load('/root/autodl-tmp/wangbin/yiwang/afsandadapt/quanzhong/best_retrained_test.pth')
 # best_model_state_strained=torch.load('/root/autodl-tmp/wangbin/yiwang/afsandadapt/quanzhong/best_strained_di.pth')
 # best_model_state_strained=torch.load('/root/autodl-tmp/wangbin/yiwang/afsandadapt/quanzhong/best_strained.pth')

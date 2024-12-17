@@ -97,7 +97,7 @@ from training_utils import *
 # from Model import get_teacher_model, get_student_model
 from utils_w import *
 from utils_ww import *
-logging.basicConfig(filename='./tc/pathtsne.log', level=logging.INFO, format='%(asctime)s %(message)s')
+logging.basicConfig(filename='./tc/path.log', level=logging.INFO, format='%(asctime)s %(message)s')
 # logging.basicConfig(filename='./tc/training_log_qf1circulate_pathmnistfinalv23.log', level=logging.INFO, format='%(asctime)s %(message)s')
 logger = logging.getLogger()
 
@@ -579,6 +579,7 @@ logger = logging.getLogger()
 #         # print(f'ad test value: {_t}, p_value: {pv}, ema: {EMA_res}, risk_score: {risk_score}')
 #         logger.info(f'ad test value: {_t}, p_value: {pv}, ema: {EMA_res}, risk_score: {risk_score}')
 
+
 device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
 print("Using device:", device)
 print("main")
@@ -782,8 +783,6 @@ if not os.path.exists(output_dir):
     os.makedirs(output_dir)
 
 num_images_to_save = 5
-
-
 for i in range(num_images_to_save):
     image, label = train_dataset_no[i]
     image = image.permute(1, 2, 0)
@@ -1156,38 +1155,25 @@ model_s =get_student_model().to(device)
 #                         help='learning rate (default: 1.0)')
 #
 #     args = parser.parse_args()
-#
-#
-#
-#
-#
-#
-#
-#
 #     use_cuda = not args.no_cuda and torch.cuda.is_available()
-#
 #     device = torch.device("cuda" if use_cuda else "cpu")
 #     eps = args.pgd_eps
 #     iters = args.pgd_iter
 #     alpha = args.pgd_alpha
-#
 #     # k_arr = qf_100_indices
 #     # k_arr = qf_100_indices
 #     # print(qf_100_indices)
 #     k_arr = [100]
 #     #   k_arr = [1, 16, 64, 128, 256]
-#
 #     D_r_acc = []
 #     D_f_acc = []
 #     D_test_acc = []
 #     case1_D_r = []
 #     case2_D_r = []
 #     case3_D_r = []
-#
 #     case1_D_f = []
 #     case2_D_f = []
 #     case3_D_f = []
-#
 #     case1_D_test = []
 #     case2_D_test = []
 #     case3_D_test = []
@@ -1886,6 +1872,7 @@ model_s =get_student_model().to(device)
 #     #     }
 #     # )
 for qf1_start in range(9005, 9999):
+
     # best_model_state_retrained =torch.load('/root/autodl-tmp/wangbin/yiwang/afsandadapt/quanzhong/best_retrained_di.pth')
     # best_model_state_retrained =torch.load('/root/autodl-tmp/wangbin/yiwang/afsandadapt/quanzhong/best_retrained.pth')
     best_model_state_retrained =torch.load('/root/autodl-tmp/wangbin/yiwang/afsandadapt/quanzhong/best_retrained_test.pth')
@@ -1919,22 +1906,22 @@ for qf1_start in range(9005, 9999):
     dataset = 'cifar10'
     method = 'ssd_tuning'
 
-    # classes = 9
-    # train_and_forget(network,kd0_5_loader,test1_loader, best_model_state_strained, best_model_state_retrained, dataset, classes, qf_1_dataset,qf1_loader, base2_dataset, method, gpu=True,train_dataset=train_dataset,CONFIG=CONFIG,cal_1000_loader=cal_1000_loader,caltest1_loader=caltest1_loader)
-    # method = 'amnesiac'
-    #
-    # train_and_forget(network,kd0_5_loader,test1_loader, best_model_state_strained, best_model_state_retrained, dataset, classes, qf_1_dataset,qf1_loader, base2_dataset, method, gpu=True,train_dataset=train_dataset,CONFIG=CONFIG,cal_1000_loader=cal_1000_loader,caltest1_loader=caltest1_loader)
+    classes = 9
+    train_and_forget(network,kd0_5_loader,test1_loader, best_model_state_strained, best_model_state_retrained, dataset, classes, qf_1_dataset,qf1_loader, base2_dataset, method, gpu=True,train_dataset=train_dataset,CONFIG=CONFIG,cal_1000_loader=cal_1000_loader,caltest1_loader=caltest1_loader)
+    method = 'amnesiac'
 
-    # method = 'blindspot'
-    # train_and_forget(network, kd0_5_loader,test1_loader,best_model_state_strained, best_model_state_retrained, dataset, classes, qf_1_dataset,qf1_loader, base2_dataset, method, gpu=True,train_dataset=train_dataset,CONFIG=CONFIG,cal_1000_loader=cal_1000_loader,caltest1_loader=caltest1_loader)
+    train_and_forget(network,kd0_5_loader,test1_loader, best_model_state_strained, best_model_state_retrained, dataset, classes, qf_1_dataset,qf1_loader, base2_dataset, method, gpu=True,train_dataset=train_dataset,CONFIG=CONFIG,cal_1000_loader=cal_1000_loader,caltest1_loader=caltest1_loader)
     #
-    # method = 'FisherForgetting'
-    # train_and_forget(network, kd0_5_loader,test1_loader,best_model_state_strained, best_model_state_retrained, dataset, classes, qf_1_dataset,qf1_loader, base2_dataset, method, gpu=True,train_dataset=train_dataset,CONFIG=CONFIG,cal_1000_loader=cal_1000_loader,caltest1_loader=caltest1_loader)
-    #
-    #
-    # subset_indices = base1_indices
-    # train_labels = PathMNISTDataset.get_labels(train_dataset, subset_indices)
-    # instance(base1_dataset, base1_indices, test1_loader, best_model_state_retrained, best_model_state_strained,cal_1000_loader, caltest1_loader, qf_1_indices,CONFIG,train_labels=train_labels,train_dataset=train_dataset)
+    method = 'blindspot'
+    train_and_forget(network, kd0_5_loader,test1_loader,best_model_state_strained, best_model_state_retrained, dataset, classes, qf_1_dataset,qf1_loader, base2_dataset, method, gpu=True,train_dataset=train_dataset,CONFIG=CONFIG,cal_1000_loader=cal_1000_loader,caltest1_loader=caltest1_loader)
+
+    method = 'FisherForgetting'
+    train_and_forget(network, kd0_5_loader,test1_loader,best_model_state_strained, best_model_state_retrained, dataset, classes, qf_1_dataset,qf1_loader, base2_dataset, method, gpu=True,train_dataset=train_dataset,CONFIG=CONFIG,cal_1000_loader=cal_1000_loader,caltest1_loader=caltest1_loader)
+
+
+    subset_indices = base1_indices
+    train_labels = PathMNISTDataset.get_labels(train_dataset, subset_indices)
+    instance(base1_dataset, base1_indices, test1_loader, best_model_state_retrained, best_model_state_strained,cal_1000_loader, caltest1_loader, qf_1_indices,CONFIG,train_labels=train_labels,train_dataset=train_dataset)
     adaptforget(
         train_dataset=train_dataset,
         num_epochsall=60,
@@ -1951,8 +1938,8 @@ for qf1_start in range(9005, 9999):
         base2_loader=base2_loader,
     )
 
-    # args = parser()
-    # afs(args,best_model_state_trained,best_model_state_retrained,base2_loader,base2_loader,test1_loader,cal_1000_loader,caltest1_loader,qf1_loader,device,train_dataset,CONFIG)
+    args = parser()
+    afs(args,best_model_state_trained,best_model_state_retrained,base2_loader,base2_loader,test1_loader,cal_1000_loader,caltest1_loader,qf1_loader,device,train_dataset,CONFIG)
 # adaptforget(
 #     num_epochsall=50,
 #     device=device,

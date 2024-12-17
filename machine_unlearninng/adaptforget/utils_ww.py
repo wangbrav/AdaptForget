@@ -125,11 +125,10 @@ def adaptforget(lambda_domain,lambda_risk,lambda_kd,train_dataset,num_epochsall,
     # best_accuracy = 0.0
 
     for epoch in range(num_epochsall):
-        start_time = time.time()  
+        start_time = time.time()
         print(f"Epoch {epoch} starting...")
         logger.info(f"Epoch {epoch} starting...")
 
-        # print(f"Epoch {epoch} starting...")
         print(f"Epoch {epoch} starting...")
         logger.info(f"Epoch {epoch} starting...")
 
@@ -170,29 +169,18 @@ def adaptforget(lambda_domain,lambda_risk,lambda_kd,train_dataset,num_epochsall,
         logger.info(
             f'>>average_euclidean_adap1t: {average_euclidean_adapt}, average_manhattan_adapt1: {average_manhattan_adapt}, average_cosine_similarity_adapt1: {average_cosine_similarity_adapt}')
 
-
-
         average_kl_div_adapt1=calculate_kl_divergence(smodelmlp, best_model_state_retrained,smodelmlp_base2, qf_100_loader, device)
         print(f'>>average_kl_div_adapt1: {average_kl_div_adapt1}')
         logger.info(f'>>average_kl_div_adapt1: {average_kl_div_adapt1}')
-
-
-
         _t, pv, EMA_res, risk_score = api(device, smodelmlp, u, f_u, qf_100_loader, member_gt, cal_1000_loader, caltest1_loader)
         current_accuracy,c2,f1 = test_model(test1_loader, qf_100_loader, kd, device, modelmlp, smodelmlp, tmodelmlp, u,f_u)
         num += 1
-
-
         logger.info(f'>>current_accuracy: {current_accuracy}, accuracy1: {c2},f1: {f1}')
         # tsnes(qf_100_loader, base2_loader, kd0_5_loader_no, smodelmlp, smodelmlp, smodelmlp, u, f_u, num)
-
-
         num += 1
         print(f'ad test value: {_t}, p_value: {pv}, ema: {EMA_res}, risk_score: {risk_score}')
-        # print(f'ad test value: {_t}, p_value: {pv}, ema: {EMA_res}, risk_score: {risk_score}')
         logger.info(f'ad test value: {_t}, p_value: {pv}, ema: {EMA_res}, risk_score: {risk_score}')
-  
         end_time = time.time()
-        epoch_duration = end_time - start_time 
+        epoch_duration = end_time - start_time
         print(f"Epoch {epoch} completed in {epoch_duration:.2f} seconds.")
         logger.info(f"Epoch {epoch} completed in {epoch_duration:.2f} seconds.")

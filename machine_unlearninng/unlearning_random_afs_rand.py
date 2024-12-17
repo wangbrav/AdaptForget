@@ -38,7 +38,7 @@ def test(model, test_loader, device):
 
 def train_student_model_random(lambda_risk,lambda_kd,forget_loader, retain_loader,test1loader, tmodel18, model34, smodel18, u,f_u):
 # def train_student_model_random(forget_loader, retain_loader,test1loader, tmodel18, model34, smodel18, u,f_u):
- # def train_student_model_random(forget_loader, retain_loader, tmodel18, model34, smodel18, u,f_u,lambda_risk,lambda_kd):
+# def train_student_model_random(forget_loader, retain_loader, tmodel18, model34, smodel18, u,f_u,lambda_risk,lambda_kd):
     cls_losses = AverageMeter()
     kd_losses = AverageMeter()
     risk_losses = AverageMeter()
