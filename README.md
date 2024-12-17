@@ -30,7 +30,7 @@ All seven datasets used in this work are publicly available. The RetinaMNIST, OC
 cd machine_unlearning/
 conda activate adaptforget
 cd adaptforget/
-python Summary_pathmnist.py
+python Summary_pathmnist_batch.py
 ```
 
 # Contact
