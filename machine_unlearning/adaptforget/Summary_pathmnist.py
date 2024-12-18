@@ -1,6 +1,6 @@
 from __future__ import print_function
 import sys
-sys.path.append('/root/autodl-tmp/wangbin/yiwang')
+sys.path.append('/root/autodl-fs/AdaptForget-main/machine_unlearninng/')
 import copy
 
 # import utils.Purification
@@ -42,9 +42,9 @@ from torch.utils.data import DataLoader, Subset, Dataset
 from torchvision import datasets, transforms
 # from tsne_mnist_samedata import tsne
 # from tsne_mnist_tuo import tsne
-from tsne_mnist_guding1 import tsnet
-from tsne_mnist_guding2 import tsnes
-# TODO xiangbi shangyige  zengjia le  afs
+# from tsne_mnist_guding1 import tsnet
+# from tsne_mnist_guding2 import tsnes
+
 from qf1kosiam import analyze_sample_similarity
 
 from calculate_kl_divergence import calculate_kl_divergence
@@ -1872,10 +1872,15 @@ model_s =get_student_model().to(device)
 #     #     }
 #     # )
 for qf1_start in range(9005, 9999):
+
+    # best_model_state_retrained =torch.load('/root/autodl-tmp/wangbin/yiwang/afsandadapt/quanzhong/best_retrained_di.pth')
+    # best_model_state_retrained =torch.load('/root/autodl-tmp/wangbin/yiwang/afsandadapt/quanzhong/best_retrained.pth')
     best_model_state_retrained =torch.load('/root/autodl-tmp/wangbin/yiwang/afsandadapt/quanzhong/best_retrained_test.pth')
-
+    # best_model_state_strained=torch.load('/root/autodl-tmp/wangbin/yiwang/afsandadapt/quanzhong/best_strained_di.pth')
+    # best_model_state_strained=torch.load('/root/autodl-tmp/wangbin/yiwang/afsandadapt/quanzhong/best_strained.pth')
     best_model_state_strained=torch.load('/root/autodl-tmp/wangbin/yiwang/afsandadapt/quanzhong/best_strained_test_zui.pth')
-
+    # best_model_state_trained = torch.load('/root/autodl-tmp/wangbin/yiwang/afsandadapt/quanzhong/best_trained_di.pth')
+    # best_model_state_trained = torch.load('/root/autodl-tmp/wangbin/yiwang/afsandadapt/quanzhong/best_trained.pth')
     best_model_state_trained = torch.load('/root/autodl-tmp/wangbin/yiwang/afsandadapt/quanzhong/best_trained_test.pth')
     u11=best_model_state_retrained
     logger.info(f'>>qf1_start: {qf1_start}')
@@ -1935,3 +1940,16 @@ for qf1_start in range(9005, 9999):
 
     args = parser()
     afs(args,best_model_state_trained,best_model_state_retrained,base2_loader,base2_loader,test1_loader,cal_1000_loader,caltest1_loader,qf1_loader,device,train_dataset,CONFIG)
+# adaptforget(
+#     num_epochsall=50,
+#     device=device,
+#     qf_100_loader=qf_1_loader,
+#     kd0_5_loader=kd0_5_loader,
+#     test1_loader=test1_loader,
+#     cal_1000_loader=cal_1000_loader,
+#     caltest1_loader=caltest1_loader,
+#     best_model_state_retrained=best_model_state_retrained,
+#     best_model_state_trained=best_model_state_trained
+# )
+# afs(args,best_model_state_trained)
+# afs(args,best_model_state_trained,base1_loader,base2_loader,test1_loader,cal_1000_loader,caltest1_loader,qf_100_loader,device)

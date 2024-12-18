@@ -19,9 +19,10 @@ from utils4 import *
 # import ssd as ssd
 from ssd import ParameterPerturber  # 从 ssd 模块中导入 ParameterPerturber 类
 from qf1kosiam import analyze_sample_similarity
-
+import sys
+sys.path.append('/root/autodl-fs/AdaptForget-main/machine_unlearninng/')
 from calculate_kl_divergence import calculate_kl_divergence
-from tsne_mnist_guding2_tsne import tsnes
+# from tsne_mnist_guding2_tsne import tsnes
 
 
 
@@ -78,7 +79,7 @@ def get_metric_scores(
     # print(f'average_euclidean1: {average_euclidean1}, average_manhattan1: {average_manhattan1}, average_cosine_similarity1: {average_cosine_similarity1}')
     print(f'average_kl_div: {average_kl_div}')
     logger.info(f'average_kl_div: {average_kl_div}')
-    tsnes(forget_train_dl, retain_train_dl, kd0_5_loader_no,model, model, model, u, f_u,num)
+    # tsnes(forget_train_dl, retain_train_dl, kd0_5_loader_no,model, model, model, u, f_u,num)
     # num += 1
 
 

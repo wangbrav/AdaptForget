@@ -11,12 +11,12 @@ from torchvision import datasets, transforms
 from torch.utils.data import DataLoader, Subset
 import numpy as np
 import sys
-sys.path.append('/root/autodl-tmp/wangbin/yiwang/')
+sys.path.append('/root/autodl-fs/AdaptForget-main/machine_unlearninng/')
 from KDloss import SoftTarget
 from tqdm import tqdm
 import torch.nn.functional as F
 import logging
-
+logger = logging.getLogger()
 from utils.Metric import AverageMeter, accuracy, Performance
 def test(model, test_loader, device):
     model.eval()

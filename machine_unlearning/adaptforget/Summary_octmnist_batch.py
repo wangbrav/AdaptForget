@@ -1,6 +1,6 @@
 from __future__ import print_function
 import sys
-sys.path.append('/root/autodl-tmp/wangbin/yiwang')
+sys.path.append('/root/autodl-fs/AdaptForget-main/machine_unlearninng/')
 import copy
 
 # import utils.Purification
@@ -42,8 +42,8 @@ from torch.utils.data import DataLoader, Subset, Dataset
 from torchvision import datasets, transforms
 # from tsne_mnist_samedata import tsne
 # from tsne_mnist_tuo import tsne
-from tsne_mnist_guding1 import tsnet
-from tsne_mnist_guding2 import tsnes
+# from tsne_mnist_guding1 import tsnet
+# from tsne_mnist_guding2 import tsnes
 
 from qf1kosiam import analyze_sample_similarity
 from utils_w import *

@@ -1,6 +1,6 @@
 from __future__ import print_function
 import sys
-sys.path.append('/root/autodl-tmp/wangbin/yiwang')
+sys.path.append('/root/autodl-fs/AdaptForget-main/machine_unlearninng/')
 import copy
 
 # import utils.Purification
@@ -32,22 +32,22 @@ from torch.optim.lr_scheduler import StepLR
 from torch.utils.data import DataLoader, Dataset
 from torch.utils.data import Subset
 from itertools import cycle
-from mu.net_train_three import get_student_model, get_teacher_model, get_student_model_t
+from models.net_train_three import get_student_model, get_teacher_model
 # from mlp_three_csv_wu import FeatureExtractor, Classifier, CombinedModel,get_student_model, get_teacher_model
-from tsne_mnist_guding2_tsne import tsnes
+# from tsne_mnist_guding2_tsne import tsnes
 
 from torch.utils.data import Dataset, DataLoader, Subset
 import os
 from utilsinstance import JointDataset, NormalizeLayer, naive_train, train, adv_attack, testins, estimate_parameter_importance
 
 os.environ["CUDA_LAUNCH_BLOCKING"] = "1"
-from plot_with_new_data import update_plot_with_new_data
-from torch.utils.data import DataLoader, Subset, Dataset
-from torchvision import datasets, transforms
-# from tsne_mnist_samedata import tsne
-# from tsne_mnist_tuo import tsne
-from tsne_mnist_guding1 import tsnet
-# from tsne_mnist_guding2 import tsnes
+# from plot_with_new_data import update_plot_with_new_data
+# from torch.utils.data import DataLoader, Subset, Dataset
+# from torchvision import datasets, transforms
+# # from tsne_mnist_samedata import tsne
+# # from tsne_mnist_tuo import tsne
+# from tsne_mnist_guding1 import tsnet
+# # from tsne_mnist_guding2 import tsnes
 from qf1kosiam import analyze_sample_similarity
 
 from calculate_kl_divergence import calculate_kl_divergence
@@ -92,9 +92,9 @@ import torchvision.transforms as transforms
 from unlearn import *
 from utils4 import *
 import forget_random_strategies
-import datasets
-# import models
-import conf
+# import datasets
+# # import models
+# import conf
 from training_utils import *
 logging.basicConfig(filename='./tc/training_log_qf1circulate_asdv7.log', level=logging.INFO, format='%(asctime)s %(message)s')
 logger = logging.getLogger()

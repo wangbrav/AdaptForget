@@ -1,7 +1,7 @@
 from __future__ import print_function
 #首先是数据集的加载 加载包括   有一个文件的加载  dataset的嘞也需要 还有一个是dataloader的加载  还有他的config  以及他的颜色扩充通道  以及其的加噪函数  transform  种子的设置
 import sys
-sys.path.append('/root/autodl-tmp/wangbin/yiwang')
+sys.path.append('/root/autodl-fs/AdaptForget-main/machine_unlearninng/')
 import copy
 
 # import utils.Purification
@@ -43,8 +43,8 @@ from torch.utils.data import DataLoader, Subset, Dataset
 from torchvision import datasets, transforms
 # from tsne_mnist_samedata import tsne
 # from tsne_mnist_tuo import tsne
-from tsne_mnist_guding1 import tsnet
-from tsne_mnist_guding2 import tsnes
+# from tsne_mnist_guding1 import tsnet
+# from tsne_mnist_guding2 import tsnes
 from qf1kosiam import analyze_sample_similarity
 
 from calculate_kl_divergence import calculate_kl_divergence

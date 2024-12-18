@@ -1,100 +1,100 @@
 from __future__ import print_function
 #首先是数据集的加载 加载包括   有一个文件的加载  dataset的嘞也需要 还有一个是dataloader的加载  还有他的config  以及他的颜色扩充通道  以及其的加噪函数  transform  种子的设置
 import sys
-sys.path.append('/root/autodl-tmp/wangbin/yiwang')
-import copy
-
-# import utils.Purification
-import argparse
-import torch.nn as nn
-import torch
-from torchvision import transforms
-import numpy as np
-import torch.nn as nn
-import torch.nn.functional as F
-import torch.optim as optim
-import torch.nn.init as init
-from torch.utils.data import ConcatDataset, DataLoader, Subset
-import logging
-from tqdm import tqdm
-import torch.nn.functional as F
-from unlearning_random_afs_rand import train_student_model_random
-from Domainadaptation_net_three import domainadaptation
-from test_model_path import test_model
+sys.path.append('/root/autodl-fs/AdaptForget-main/machine_unlearninng/')
+# import copy
+#
+# # import utils.Purification
+# import argparse
+# import torch.nn as nn
+# import torch
+# from torchvision import transforms
+# import numpy as np
+# import torch.nn as nn
+# import torch.nn.functional as F
+# import torch.optim as optim
+# import torch.nn.init as init
+# from torch.utils.data import ConcatDataset, DataLoader, Subset
+# import logging
+# from tqdm import tqdm
+# import torch.nn.functional as F
+# # from unlearning_random_afs_rand import train_student_model_random
+# # from Domainadaptation_net_three import domainadaptation
+# # from test_model_path import test_model
 # from puri import api
-import random
-from puri import api
-import itertools
-from advertorch.attacks import L2PGDAttack
-import matplotlib.pyplot as plt
-from torchvision import datasets, transforms
-from torch.optim.lr_scheduler import StepLR
-from torch.utils.data import DataLoader, Dataset
-from torch.utils.data import Subset
-from itertools import cycle
-from mu.net_train_three import get_student_model, get_teacher_model, get_student_model_t
-from torch.utils.data import Dataset, DataLoader, Subset
+# import random
+# # from puri import api
+# # import itertools
+# # from advertorch.attacks import L2PGDAttack
+# import matplotlib.pyplot as plt
+# from torchvision import datasets, transforms
+# from torch.optim.lr_scheduler import StepLR
+# from torch.utils.data import DataLoader, Dataset
+# from torch.utils.data import Subset
+# from itertools import cycle
+from models.net_train_three import get_student_model, get_teacher_model
+# from torch.utils.data import Dataset, DataLoader, Subset
+# import os
+# from utilsinstance import JointDataset, NormalizeLayer, naive_train, train, adv_attack, testins, estimate_parameter_importance
 import os
-from utilsinstance import JointDataset, NormalizeLayer, naive_train, train, adv_attack, testins, estimate_parameter_importance
-
 os.environ["CUDA_LAUNCH_BLOCKING"] = "1"
-from plot_with_new_data import update_plot_with_new_data
-from torch.utils.data import DataLoader, Subset, Dataset
-from torchvision import datasets, transforms
-# from tsne_mnist_samedata import tsne
-# from tsne_mnist_tuo import tsne
-from tsne_mnist_guding1 import tsnet
-from tsne_mnist_guding2 import tsnes
-from qf1kosiam import analyze_sample_similarity
-
-from calculate_kl_divergence import calculate_kl_divergence
-import torch.nn.init as init
-#   afs
-from copy import deepcopy
-
-import matplotlib.pyplot as plt
-import argparse
-import sys
-import torch
-from utils.KDloss import SoftTarget
-from utils.Metric import AverageMeter, accuracy, Performance
-import os
-import numpy as np
-from tqdm import tqdm
-from utils.Log import log_creater
-import utils.Audit as Audit
-import torch.nn as nn
-import time
-import random
-import os
-# import wandb
-
-# import optuna
-from typing import Tuple, List
-import sys
-import argparse
-import time
-from datetime import datetime
-
-import numpy as np
-import torch
-import torch.nn as nn
-from torch.utils.data import DataLoader, ConcatDataset, dataset
-from torch.utils.data import DataLoader, Dataset
-from torch.utils.data import Subset
-import torch.optim as optim
-import torchvision
-import torchvision.transforms as transforms
-# import models
-from unlearn import *
-from utils4 import *
-import forget_random_strategies
-import datasets
-# import models
-import conf
-from training_utils import *
-# from Dataset import DataModule, CONFIG
-# from Model import get_teacher_model, get_student_model
+# # from plot_with_new_data import update_plot_with_new_data
+# # from torch.utils.data import DataLoader, Subset, Dataset
+# # from torchvision import datasets, transforms
+# # # from tsne_mnist_samedata import tsne
+# # # from tsne_mnist_tuo import tsne
+# # from tsne_mnist_guding1 import tsnet
+# # from tsne_mnist_guding2 import tsnes
+# # from qf1kosiam import analyze_sample_similarity
+#
+# # from calculate_kl_divergence import calculate_kl_divergence
+# import torch.nn.init as init
+# #   afs
+# from copy import deepcopy
+#
+# import matplotlib.pyplot as plt
+# import argparse
+# import sys
+# import torch
+# # from utils.KDloss import SoftTarget
+# # from utils.Metric import AverageMeter, accuracy, Performance
+# # import os
+# # import numpy as np
+# # from tqdm import tqdm
+# # from utils.Log import log_creater
+# # import utils.Audit as Audit
+# import torch.nn as nn
+# import time
+# import random
+# import os
+# # import wandb
+#
+# # import optuna
+# # from typing import Tuple, List
+# # import sys
+# # import argparse
+# # import time
+# # from datetime import datetime
+# #
+# # import numpy as np
+# # import torch
+# # import torch.nn as nn
+# # from torch.utils.data import DataLoader, ConcatDataset, dataset
+# # from torch.utils.data import DataLoader, Dataset
+# # from torch.utils.data import Subset
+# # import torch.optim as optim
+# # import torchvision
+# # import torchvision.transforms as transforms
+# # import models
+# # from unlearn import *
+# # from utils4 import *
+# # import forget_random_strategies
+# # import datasets
+# # # import models
+# # import conf
+# from training_utils import *
+# # from Dataset import DataModule, CONFIG
+# # from Model import get_teacher_model, get_student_model
 from utils_w import *
 from utils_ww import *
 logging.basicConfig(filename='./tc/training_log_qf1circulate_asdv7.log', level=logging.INFO, format='%(asctime)s %(message)s')
@@ -586,7 +586,7 @@ device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
 print("Using device:", device)
 print("main")
 
-npz_file_path = '/root/autodl-tmp/wangbin/yiwang/data/pathmnist.npz'
+npz_file_path = "/root/autodl-fs/AdaptForget-main/machine_unlearninng/data/pathmnist.npz"
 
 data = np.load(npz_file_path)
 
@@ -700,67 +700,67 @@ class ImageDataset(Dataset):
         return image, label
 
 
-class noPathMNISTDataset(Dataset):
-    def __init__(self, dataset_type='cifar10', root='/root/data', transform=None, download=False):
-        """
-        Initialize the dataset with specified dataset type (CIFAR-10 or ImageNet).
-
-        Args:
-            dataset_type (str): Type of dataset to load ('cifar10' or 'imagenet').
-            root (str): Root directory where the data will be stored.
-            transform (callable, optional): Transform to apply to the images.
-            download (bool): If True, downloads the dataset.
-        """
-        self.dataset_type = dataset_type.lower()
-        self.transform = transform
-
-        # Load CIFAR-10 or ImageNet using torchvision
-        if self.dataset_type == 'cifar10':
-            dataset = datasets.CIFAR10(root=root, train=True, download=download)
-        elif self.dataset_type == 'imagenet':
-            dataset = datasets.ImageNet(root=root, split='train', download=download)
-        else:
-            raise ValueError("Unsupported dataset type. Use 'cifar10' or 'imagenet'.")
-
-        # Extract images and labels from the dataset
-        all_images = np.array([np.array(image) for image, _ in dataset])
-        all_labels = np.array([label for _, label in dataset])
-
-        # Filter out labels that are equal to 9
-        mask = all_labels < 9  # True for labels 0-8, False for label 9
-        self.original_images = all_images[mask]
-        self.original_labels = all_labels[mask]
-
-        # Copy filtered images and labels to be used in dataset
-        self.images = self.original_images.copy()
-        self.labels = self.original_labels.copy()
-
-    def __len__(self):
-        return len(self.images)
-
-    def __getitem__(self, idx):
-        # Get the image and label at the specified index
-        image = self.images[idx]
-        label = self.labels[idx]
-
-        # Apply the transform if provided
-        if self.transform:
-            image = self.transform(image)
-
-        return image, label
-
-    def shuffle_data(self, seed=62):
-        # Shuffle the data with the specified seed for consistency
-        print(f"Shuffling data with seed {seed}")
-        np.random.seed(seed)
-        indices = np.arange(len(self.original_images))
-        np.random.shuffle(indices)
-        self.images = self.original_images[indices]
-        self.labels = self.original_labels[indices]
-
-    def get_labels(self, indices):
-        # Return labels at specified indices
-        return [self.labels[i] for i in indices]
+# class noPathMNISTDataset(Dataset):
+#     def __init__(self, dataset_type='cifar10', root='/root/data', transform=None, download=False):
+#         """
+#         Initialize the dataset with specified dataset type (CIFAR-10 or ImageNet).
+#
+#         Args:
+#             dataset_type (str): Type of dataset to load ('cifar10' or 'imagenet').
+#             root (str): Root directory where the data will be stored.
+#             transform (callable, optional): Transform to apply to the images.
+#             download (bool): If True, downloads the dataset.
+#         """
+#         self.dataset_type = dataset_type.lower()
+#         self.transform = transform
+#
+#         # Load CIFAR-10 or ImageNet using torchvision
+#         # if self.dataset_type == 'cifar10':
+#         #     dataset = datasets.CIFAR10(root=root, train=True, download=download)
+#         # elif self.dataset_type == 'imagenet':
+#         #     dataset = datasets.ImageNet(root=root, split='train', download=download)
+#         # else:
+#         #     raise ValueError("Unsupported dataset type. Use 'cifar10' or 'imagenet'.")
+#
+#         # Extract images and labels from the dataset
+#         all_images = np.array([np.array(image) for image, _ in dataset])
+#         all_labels = np.array([label for _, label in dataset])
+#
+#         # Filter out labels that are equal to 9
+#         mask = all_labels < 9  # True for labels 0-8, False for label 9
+#         self.original_images = all_images[mask]
+#         self.original_labels = all_labels[mask]
+#
+#         # Copy filtered images and labels to be used in dataset
+#         self.images = self.original_images.copy()
+#         self.labels = self.original_labels.copy()
+#
+#     def __len__(self):
+#         return len(self.images)
+#
+#     def __getitem__(self, idx):
+#         # Get the image and label at the specified index
+#         image = self.images[idx]
+#         label = self.labels[idx]
+#
+#         # Apply the transform if provided
+#         if self.transform:
+#             image = self.transform(image)
+#
+#         return image, label
+#
+#     def shuffle_data(self, seed=62):
+#         # Shuffle the data with the specified seed for consistency
+#         print(f"Shuffling data with seed {seed}")
+#         np.random.seed(seed)
+#         indices = np.arange(len(self.original_images))
+#         np.random.shuffle(indices)
+#         self.images = self.original_images[indices]
+#         self.labels = self.original_labels[indices]
+#
+#     def get_labels(self, indices):
+#         # Return labels at specified indices
+#         return [self.labels[i] for i in indices]
 CONFIG = {
     'BASE1': {
         'BASE': list(range(0, 10000))
@@ -903,34 +903,34 @@ transform_image = transforms.Compose([
 ])
 
 # Initialize Dataset
-image_dataset = ImageDataset(csv_file='/root/autodl-tmp/wangbin/yiwang/data/val_s.csv', root_dir='/root/autodl-tmp/wangbin/yiwang/data/images', transform=transform_image)
+# image_dataset = ImageDataset(csv_file='/root/autodl-tmp/wangbin/yiwang/data/val_s.csv', root_dir='/root/autodl-tmp/wangbin/yiwang/data/images', transform=transform_image)
 
 train_dataset = PathMNISTDataset(images, labels, transform=transform)
 test_dataset = PathMNISTDataset(images_test, labels_test, transform=transform)
 # plot_images_per_class(train_dataset, 9)
-cifar_dataset =noPathMNISTDataset(dataset_type='cifar10', transform=notransform)
-cifar_dataset.shuffle_data(seed=42)
+# cifar_dataset =noPathMNISTDataset(dataset_type='cifar10', transform=notransform)
+# cifar_dataset.shuffle_data(seed=42)
 train_dataset.shuffle_data()
 
 train_dataset_no = PathMNISTDataset(images, labels, transform=transform_no_salt_pepper)
 import os
 import matplotlib.pyplot as plt
 
-output_dir = 'output_images'
-if not os.path.exists(output_dir):
-    os.makedirs(output_dir)
-
-num_images_to_save = 5
-
-
-for i in range(num_images_to_save):
-    image, label = train_dataset_no[i]
-    image = image.permute(1, 2, 0)
-    plt.imshow(image)
-    plt.title(f'Label: {label}')
-    plt.axis('off')
-    plt.savefig(f'{output_dir}/image_{i}.png')
-    plt.close()
+# output_dir = 'output_images'
+# if not os.path.exists(output_dir):
+#     os.makedirs(output_dir)
+#
+# num_images_to_save = 5
+# # all_images = np.array([np.array(image) for image, _ in dataset])
+#
+# for i in range(num_images_to_save):
+#     image, label = train_dataset_no[i]
+#     image = image.permute(1, 2, 0)
+#     plt.imshow(image)
+#     plt.title(f'Label: {label}')
+#     plt.axis('off')
+#     plt.savefig(f'{output_dir}/image_{i}.png')
+#     plt.close()
 
 
 train_dataset_no.shuffle_data()
@@ -1021,12 +1021,12 @@ model_s =get_student_model().to(device)
 epochs =40
 learning_rate = 0.001
 
-# best_accuracy=0
+best_accuracy=0
 best_accuracy_strained=0
-# best_accuracy_s=0
+best_accuracy_s=0
 #
-# best_model_state_retrained = None
-# best_model_state_trained = None
+best_model_state_retrained = None
+best_model_state_trained = None
 best_model_state_strained = None
 #
 #
@@ -1066,7 +1066,8 @@ for epoch in range(epochs):
     # best_model_state_strained_zui = model.state_dict().copy()
     best_model_state_strained_zui = model_strained.state_dict().copy()
     save_dir = "./weights/"
-    save_path_strained_zui = os.path.join(save_dir, "best_strained_test_zui.pth")
+    os.makedirs(save_dir, exist_ok=True)
+    save_path_strained_zui = os.path.join(save_dir, "best_strained_test_best.pth")
     torch.save(best_model_state_strained_zui, save_path_strained_zui)
 
     # test_accuracy,f1 = test(model, test1_loader, device)
@@ -1135,7 +1136,7 @@ for epoch in range(epochs):
     train_accuracy = 100 * correct / len(base1_loader.dataset)
     print(f"Train Loss: {train_loss:.4f}, Train Accuracy: {train_accuracy:.2f}%")
 
-    test_accuracy = test(model, test1_loader, device)
+    test_accuracy , f1 = test(model, test1_loader, device)
     print(f"Test Accuracy: {test_accuracy:.2f}%")
     if test_accuracy > best_accuracy:
         best_accuracy = test_accuracy
@@ -1174,7 +1175,7 @@ for epoch in range(epochs):
     train_accuracy = 100 * correct / len(base2_loader.dataset)
     print(f"Train Loss: {train_loss:.4f}, Train Accuracy: {train_accuracy:.2f}%")
 
-    test_accuracy = test(model_s, test1_loader, device)
+    test_accuracy, f1 = test(model_s, test1_loader, device)
     print(f"Test Accuracy: {test_accuracy:.2f}%")
 
     if test_accuracy > best_accuracy_s:
@@ -1206,11 +1207,11 @@ Comment question
 '''
 Comment question
 '''
-best_model_state_retrained =torch.load('/root/autodl-tmp/wangbin/yiwang/afsandadapt/quanzhong/best_retrained_test.pth')
+best_model_state_retrained =torch.load('/root/autodl-fs/AdaptForget-main/machine_unlearninng/adaptforget/weights/best_retrained_test.pth')
 
-best_model_state_strained=torch.load('/root/autodl-tmp/wangbin/yiwang/afsandadapt/quanzhong/best_strained_test_zui.pth')
+best_model_state_strained=torch.load('/root/autodl-fs/AdaptForget-main/machine_unlearninng/adaptforget/weights/best_strained_test_best.pth')
 
-best_model_state_trained = torch.load('/root/autodl-tmp/wangbin/yiwang/afsandadapt/quanzhong/best_trained_test.pth')
+best_model_state_trained = torch.load('/root/autodl-fs/AdaptForget-main/machine_unlearninng/adaptforget/weights/best_trained_test.pth')
 u11=best_model_state_retrained
 logger.info(f'>>qf100_start:1')
 network = 'resnet18'
@@ -1232,7 +1233,7 @@ train_labels = PathMNISTDataset.get_labels(train_dataset, subset_indices)
 instance(base1_dataset, base1_indices, test1_loader, best_model_state_retrained, best_model_state_strained,cal_1000_loader, caltest1_loader, QF100indices,CONFIG,train_labels=train_labels,train_dataset=train_dataset,kd0_5_loader_no=kd0_5_loader_no)
 adaptforget(
     lambda_domain=1,
-    lambda_risk=1,
+    lambda_risk=0.07,
     lambda_kd=1,
     train_dataset=train_dataset,
     num_epochsall=50,

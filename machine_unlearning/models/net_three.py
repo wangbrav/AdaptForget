@@ -104,4 +104,5 @@ def get_teacher_model():
     return Net(3,256,4)
 
 def get_student_model():
-    return Net(3,128,5)
+    # return Net(3,128,5)
+    return Net(3,128,9)

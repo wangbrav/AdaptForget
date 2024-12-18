@@ -7,7 +7,7 @@ import torch.nn as nn
 import torch
 from torch.utils.data import  Subset
 import sys
-sys.path.append('/root/autodl-tmp/wangbin/yiwang')
+sys.path.append('/root/autodl-fs/AdaptForget-main/machine_unlearninng/')
 import numpy as np
 # from KDloss import SoftTarget
 from unlearning_random_afs_rand import train_student_model_random
@@ -68,10 +68,9 @@ from torch.utils.data import DataLoader, Subset, Dataset
 from torchvision import datasets, transforms
 # from tsne_mnist_samedata import tsne
 # from tsne_mnist_tuo import tsne
-from tsne_mnist_guding1 import tsnet
-from tsne_mnist_guding2 import tsnes
-# 相比上一个  更改了 数据集的划分方法
-# TODO xiangbi shangyige  zengjia le  afs
+# from tsne_mnist_guding1 import tsnet
+# from tsne_mnist_guding2 import tsnes
+
 from qf1kosiam import analyze_sample_similarity
 
 from calculate_kl_divergence import calculate_kl_divergence

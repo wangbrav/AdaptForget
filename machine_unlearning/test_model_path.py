@@ -1,24 +1,24 @@
-import torch
-import torch
-from torchvision import datasets, transforms
-from torch.utils.data import DataLoader
-from resnet18 import ResNet18
-# from resnet34 import ResNet34
-from mu.net_train import get_model
-import torch
-import torch.nn as nn
-import torch.optim as optim
-from torchvision import datasets, transforms
-from torch.utils.data import DataLoader
+# import torch
+# import torch
+# from torchvision import datasets, transforms
+# from torch.utils.data import DataLoader
+# # from resnet18 import ResNet18
+# # # from resnet34 import ResNet34
+# # from mu.net_train import get_model
+# import torch
+# import torch.nn as nn
+# import torch.optim as optim
+# from torchvision import datasets, transforms
+# from torch.utils.data import DataLoader
 import torch
 from sklearn.metrics import precision_recall_fscore_support
 from sklearn.metrics import confusion_matrix
+# import numpy as np
+# from torchvision import datasets, transforms
+# from torch.utils.data import DataLoader, Subset
 import numpy as np
-from torchvision import datasets, transforms
-from torch.utils.data import DataLoader, Subset
-import numpy as np
-from KDloss import SoftTarget
-from tqdm import tqdm
+# from KDloss import SoftTarget
+# from tqdm import tqdm
 
 def test_model(test_loader,retain_loader, forget_loader, device, model34, smodel18, tmodel18,u,f_u):
     smodel18.load_state_dict(u)

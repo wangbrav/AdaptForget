@@ -4,114 +4,114 @@ import sys
 
 # from adversarial_3_net_afs_path_ab import base2_loader
 
-sys.path.append('/root/autodl-tmp/wangbin/yiwang')
+sys.path.append('/root/autodl-fs/AdaptForget-main/machine_unlearninng/')
 import copy
-from sklearn.metrics import f1_score
-import torch
-from tqdm import tqdm
-# import utils.Purification
-import argparse
-import torch.nn as nn
-import torch
-from torchvision import transforms
-import numpy as np
-import torch.nn as nn
-import torch.nn.functional as F
-import torch.optim as optim
-import torch.nn.init as init
+# from sklearn.metrics import f1_score
+# import torch
+# from tqdm import tqdm
+# # import utils.Purification
+# import argparse
+# import torch.nn as nn
+# import torch
+# from torchvision import transforms
+# import numpy as np
+# import torch.nn as nn
+# import torch.nn.functional as F
+# import torch.optim as optim
+# import torch.nn.init as init
 from torch.utils.data import ConcatDataset, DataLoader, Subset
 import logging
 from torch.nn.functional import softmax
 from qf1kosiam import analyze_sample_similarity,analyze_sample_similarity_sisa
-from sklearn.metrics import f1_score
-from tqdm import tqdm
-import torch.nn.functional as F
-from unlearning_random_afs_rand import train_student_model_random
-from Domainadaptation_net_three import domainadaptation
-from test_model_path import test_model
-# from puri import api
-import random
+# from sklearn.metrics import f1_score
+# from tqdm import tqdm
+# import torch.nn.functional as F
+# from unlearning_random_afs_rand import train_student_model_random
+# from Domainadaptation_net_three import domainadaptation
+# from test_model_path import test_model
+# # from puri import api
+# import random
 from puri import api
-from afsandadapt.puri_sisa import  api_sisa
-import itertools
+from puri_sisa import  api_sisa
+# import itertools
 from advertorch.attacks import L2PGDAttack
-import matplotlib.pyplot as plt
-from torchvision import datasets, transforms
-from torch.optim.lr_scheduler import StepLR
-from torch.utils.data import DataLoader, Dataset
-from torch.utils.data import Subset
+# import matplotlib.pyplot as plt
+# from torchvision import datasets, transforms
+# from torch.optim.lr_scheduler import StepLR
+# from torch.utils.data import DataLoader, Dataset
+# from torch.utils.data import Subset
 from itertools import cycle
 # from mu.net_train_three import get_student_model, get_teacher_model, get_student_model_t
-from mlp_three_csv_wu import FeatureExtractor, Classifier, CombinedModel,get_student_model, get_teacher_model
-
+# from models.mlp_three_csv_wu import FeatureExtractor, Classifier, CombinedModel,get_student_model, get_teacher_model
+from models.net_train_three import get_student_model, get_teacher_model
 from torch.utils.data import Dataset, DataLoader, Subset
 import os
 from utilsinstance import JointDataset, NormalizeLayer, naive_train, train, adv_attack, testins, estimate_parameter_importance
 
 os.environ["CUDA_LAUNCH_BLOCKING"] = "1"
-from plot_with_new_data import update_plot_with_new_data
-from torch.utils.data import DataLoader, Subset, Dataset
-from torchvision import datasets, transforms
-# from tsne_mnist_samedata import tsne
-# from tsne_mnist_tuo import tsne
-from tsne_mnist_guding1 import tsnet
-# from tsne_mnist_guding2 import tsnes
-from tsne_mnist_guding2_tsne import tsnes
+# from plot_with_new_data import update_plot_with_new_data
+# from torch.utils.data import DataLoader, Subset, Dataset
+# from torchvision import datasets, transforms
+# # from tsne_mnist_samedata import tsne
+# # from tsne_mnist_tuo import tsne
+# from tsne_mnist_guding1 import tsnet
+# # from tsne_mnist_guding2 import tsnes
+# from tsne_mnist_guding2_tsne import tsnes
 # 相比上一个  更改了 数据集的划分方法
 # TODO xiangbi shangyige  zengjia le  afs
 from qf1kosiam import analyze_sample_similarity
 
 from calculate_kl_divergence import calculate_kl_divergence
 # 加载npz文件
-import torch.nn.init as init
+# import torch.nn.init as init
 #   afs
 from copy import deepcopy
 
-import matplotlib.pyplot as plt
-import argparse
-import sys
-import torch
-from utils.KDloss import SoftTarget
-from utils.Metric import AverageMeter, accuracy, Performance
-import os
-import numpy as np
+# import matplotlib.pyplot as plt
+# import argparse
+# import sys
+# import torch
+# from utils.KDloss import SoftTarget
+# from utils.Metric import AverageMeter, accuracy, Performance
+# import os
+# import numpy as np
 from tqdm import tqdm
-from utils.Log import log_creater
-import utils.Audit as Audit
-import torch.nn as nn
-import time
-import random
-import os
-# import wandb
-
-# import optuna
-from typing import Tuple, List
-import sys
+# from utils.Log import log_creater
+# import utils.Audit as Audit
+# import torch.nn as nn
+# import time
+# import random
+# import os
+# # import wandb
+#
+# # import optuna
+# from typing import Tuple, List
+# import sys
 import argparse
-import time
-from datetime import datetime
+# import time
+# from datetime import datetime
 from sklearn.metrics import accuracy_score, f1_score as calculate_f12_score
-from tsne_mnist_guding2_tsne import tsnes
-from tsne_mnist_guding2_tsne import tsnessisa
-
-import numpy as np
-import torch
-import torch.nn as nn
-from torch.utils.data import DataLoader, ConcatDataset, dataset
-from torch.utils.data import DataLoader, Dataset
+# from tsne_mnist_guding2_tsne import tsnes
+# from tsne_mnist_guding2_tsne import tsnessisa
+#
+# import numpy as np
+# import torch
+# import torch.nn as nn
+# from torch.utils.data import DataLoader, ConcatDataset, dataset
+# from torch.utils.data import DataLoader, Dataset
 from utils.KDloss import SoftTarget
 from utils.Metric import AverageMeter, accuracy, Performance
 from torch.utils.data import Subset
 import torch.optim as optim
-import torchvision
-import torchvision.transforms as transforms
+# import torchvision
+# import torchvision.transforms as transforms
 # import models
 from unlearn import *
 from utils4 import *
 import forget_random_strategies
-import datasets
-# import models
-import conf
+# import datasets
+# # import models
+# import conf
 from sklearn.metrics import precision_recall_fscore_support
 from sklearn.metrics import confusion_matrix
 from training_utils import *
@@ -333,7 +333,7 @@ def afs(args,best_model_state_trained,best_model_state_retrained,base1_loader,ba
             print(f'>>average_kl_div_afs: {average_kl_div_afs}')
             logger.info(f'>>average_kl_div_afs: {average_kl_div_afs}')
             num = 0
-            tsnes(qf_100_loader, base2_loader, kd0_5_loader_no, snet, snet, snet, u, f_u, num)
+            # tsnes(qf_100_loader, base2_loader, kd0_5_loader_no, snet, snet, snet, u, f_u, num)
 
             # save_best_ckpt(snet, args)
             # best_model_state_afs = snet.state_dict().copy()
@@ -1002,7 +1002,7 @@ def instance(base1_dataset, base1_indices,test1_loader,best_model_state_retraine
             f'average_euclidean1: {average_euclidean1}, average_manhattan1: {average_manhattan1}, average_cosine_similarity1: {average_cosine_similarity1}')
 
         num = 1
-        tsnes(unlearn_loader, other_loader, kd0_5_loader_no, model, model, model, u, f_u, num)
+        # tsnes(unlearn_loader, other_loader, kd0_5_loader_no, model, model, model, u, f_u, num)
 
         logger.info(f'average_kl_div: {average_kl_div}')
         case3_D_test.append(test_acc)
@@ -1398,7 +1398,7 @@ def sisa(train_dataset,CONFIG,qf_50_loader,test1_loader,base2_loader,kd0_5_loade
     logger.info(f'average_euclidean_retrained1: {average_euclidean_retrained1}, average_manhattan_retrained1: {average_manhattan_retrained1}, average_cosine_similarity_retrained1: {average_cosine_similarity_retrained1}')
 
     num = 1
-    tsnessisa(qf_50_loader, base2_loader, kd0_5_loader_no,models, models, models, weights, weights,num)
+    # tsnessisa(qf_50_loader, base2_loader, kd0_5_loader_no,models, models, models, weights, weights,num)
     # tsnes(qf_50_loader, base2_loader, kd0_5_loader_no,model, model, model, u, f_u,num)
 
     torch.save(model.state_dict(), "model_weights.pth")
@@ -1541,7 +1541,7 @@ def euk(train_dataset, CONFIG,best_model_state_trained,base2_loader,test1_loader
     logger.info(f'average_euclidean_retrained: {average_euclidean_retrained}, average_manhattan_retrained: {average_manhattan_retrained}, average_cosine_similarity_retrained: {average_cosine_similarity_retrained}')
 
     num = 1
-    tsnes(qf_100_loader, base2_loader, kd0_5_loader_no, modelmlp, modelmlp, modelmlp, u1, f_u1, num)
+    # tsnes(qf_100_loader, base2_loader, kd0_5_loader_no, modelmlp, modelmlp, modelmlp, u1, f_u1, num)
 
 
 def cfk(train_dataset, CONFIG,best_model_state_trained,base2_loader,test1_loader,qf_100_loader, cal_1000_loader, caltest1_loader,device,kd0_5_loader_no):
@@ -1601,4 +1601,4 @@ def cfk(train_dataset, CONFIG,best_model_state_trained,base2_loader,test1_loader
     print(f'average_euclidean_retrained: {average_euclidean_retrained1}, average_manhattan_retrained: {average_manhattan_retrained1}, average_cosine_similarity_retrained: {average_cosine_similarity_retrained1}')
     logger.info(f'average_euclidean_retrained: {average_euclidean_retrained1}, average_manhattan_retrained: {average_manhattan_retrained1}, average_cosine_similarity_retrained: {average_cosine_similarity_retrained1}')
     num = 2
-    tsnes(qf_100_loader, base2_loader, kd0_5_loader_no, modelmlp2, modelmlp2, modelmlp2, u2, f_u2, num)
+    # tsnes(qf_100_loader, base2_loader, kd0_5_loader_no, modelmlp2, modelmlp2, modelmlp2, u2, f_u2, num)

@@ -1,121 +1,122 @@
 from __future__ import print_function
 import sys
-sys.path.append('/root/autodl-tmp/wangbin/yiwang')
+sys.path.append('/root/autodl-fs/AdaptForget-main/machine_unlearninng/')
 import copy
 import torch.nn as nn
 import torch
 from torch.utils.data import  Subset
 import sys
-sys.path.append('/root/autodl-tmp/wangbin/yiwang')
+sys.path.append('/root/autodl-fs/AdaptForget-main/machine_unlearninng/')
 import numpy as np
-# from KDloss import SoftTarget
-from unlearning_random_afs_rand import train_student_model_random
-from Domainadaptation_csv_three_wu import domainadaptation
-from test_model_path import test_model
-from puri import api
-import random
-from mlp_three_csv_wu import FeatureExtractor, Classifier, CombinedModel,get_student_model, get_teacher_model
-from torch.utils.data import Dataset, DataLoader
-import pandas as pd
-import numpy as np
-import torch
-from torch.utils.data import Dataset
-from qf1kosiam import  analyze_sample_similarity
-from qf1kosiam import analyze_sample_similarity
-
-from calculate_kl_divergence import calculate_kl_divergence
+# # from KDloss import SoftTarget
+# from ..unlearning_random_afs_rand import train_student_model_random
+# from ..Domainadaptation_csv_three_wu import domainadaptation
+# from ..test_model_path import test_model
+# from ..puri import api
+# import random
+# from ..mlp_three_csv_wu import FeatureExtractor, Classifier, CombinedModel,get_student_model, get_teacher_model
+# from torch.utils.data import Dataset, DataLoader
+# import pandas as pd
+# import numpy as np
+# import torch
+# from torch.utils.data import Dataset
+# from ..qf1kosiam import  analyze_sample_similarity
+# from ..qf1kosiam import analyze_sample_similarity
+#
+# from ..calculate_kl_divergence import calculate_kl_divergence
 global epochs
-# import utils.Purification
-import argparse
-import torch.nn as nn
-import torch
-from torchvision import transforms
-import numpy as np
-import torch.nn as nn
-import torch.nn.functional as F
-import torch.optim as optim
-import torch.nn.init as init
-from torch.utils.data import ConcatDataset, DataLoader, Subset
-import logging
-from tqdm import tqdm
-import torch.nn.functional as F
-from unlearning_random_afs_rand import train_student_model_random
-from Domainadaptation_csv_three_wu import domainadaptation
-from test_model_path import test_model
-# from unlearning_random_afs_rand import train_student_model_random
-# from Domainadaptation_net_three import domainadaptation
-# from test_model_path import test_model
-# from puri import api
-import random
-from puri import api
-import itertools
-from advertorch.attacks import L2PGDAttack
-import matplotlib.pyplot as plt
-from torchvision import datasets, transforms
-from torch.optim.lr_scheduler import StepLR
-from torch.utils.data import DataLoader, Dataset
-from torch.utils.data import Subset
-from itertools import cycle
-# from mu.net_train_three import get_student_model, get_teacher_model, get_student_model_t
-from torch.utils.data import Dataset, DataLoader, Subset
+# # import utils.Purification
+# import argparse
+# import torch.nn as nn
+# import torch
+# from torchvision import transforms
+# import numpy as np
+# import torch.nn as nn
+# import torch.nn.functional as F
+# import torch.optim as optim
+# import torch.nn.init as init
+# from torch.utils.data import ConcatDataset, DataLoader, Subset
+# import logging
+# from tqdm import tqdm
+# import torch.nn.functional as F
+# from ..unlearning_random_afs_rand import train_student_model_random
+# from ..Domainadaptation_csv_three_wu import domainadaptation
+# from ..test_model_path import test_model
+# # from unlearning_random_afs_rand import train_student_model_random
+# # from Domainadaptation_net_three import domainadaptation
+# # from test_model_path import test_model
+# # from puri import api
+# import random
+# from ..puri import api
+# import itertools
+# from advertorch.attacks import L2PGDAttack
+# import matplotlib.pyplot as plt
+# from torchvision import datasets, transforms
+# from torch.optim.lr_scheduler import StepLR
+# from torch.utils.data import DataLoader, Dataset
+# from torch.utils.data import Subset
+# from itertools import cycle
+# # from mu.net_train_three import get_student_model, get_teacher_model, get_student_model_t
+# from torch.utils.data import Dataset, DataLoader, Subset
 import os
-from utilsinstance import JointDataset, NormalizeLayer, naive_train, train, adv_attack, testins, estimate_parameter_importance
+# from ..utilsinstance import JointDataset, NormalizeLayer, naive_train, train, adv_attack, testins, estimate_parameter_importance
 
 os.environ["CUDA_LAUNCH_BLOCKING"] = "1"
-from plot_with_new_data import update_plot_with_new_data
-from torch.utils.data import DataLoader, Subset, Dataset
-from torchvision import datasets, transforms
-# from tsne_mnist_samedata import tsne
-# from tsne_mnist_tuo import tsne
-from tsne_mnist_guding1 import tsnet
-from tsne_mnist_guding2 import tsnes
-from qf1kosiam import analyze_sample_similarity
-
-from calculate_kl_divergence import calculate_kl_divergence
-import torch.nn.init as init
-from copy import deepcopy
-
-import matplotlib.pyplot as plt
-import argparse
-import sys
-import torch
-from utils.KDloss import SoftTarget
-from utils.Metric import AverageMeter, accuracy, Performance
-import os
-import numpy as np
-from tqdm import tqdm
-from utils.Log import log_creater
-import utils.Audit as Audit
-import torch.nn as nn
-import time
-import random
-import os
-# import wandb
-
-# import optuna
-from typing import Tuple, List
-import sys
-import argparse
-import time
-from datetime import datetime
-
-import numpy as np
-import torch
-import torch.nn as nn
-from torch.utils.data import DataLoader, ConcatDataset, dataset
-from torch.utils.data import DataLoader, Dataset
-from torch.utils.data import Subset
-import torch.optim as optim
-import torchvision
-import torchvision.transforms as transforms
-# import models
-from unlearn import *
-from utils4 import *
-# import forget_random_strategies_diabetes
-# import datasets
-# import models
-import conf
-from training_utils import *
+# from plot_with_new_data import update_plot_with_new_data
+# from torch.utils.data import DataLoader, Subset, Dataset
+# from torchvision import datasets, transforms
+# # from tsne_mnist_samedata import tsne
+# # from tsne_mnist_tuo import tsne
+# from tsne_mnist_guding1 import tsnet
+# from tsne_mnist_guding2 import tsnes
+# from qf1kosiam import analyze_sample_similarity
+#
+# from ..calculate_kl_divergence import calculate_kl_divergence
+# import torch.nn.init as init
+# from copy import deepcopy
+#
+# import matplotlib.pyplot as plt
+# import argparse
+# import sys
+# import torch
+# from ..utils.KDloss import SoftTarget
+# from ..utils.Metric import AverageMeter, accuracy, Performance
+# import os
+# import numpy as np
+# from tqdm import tqdm
+# from ..utils.Log import log_creater
+# from ..utils import Audit as Audit
+# # import utils.Audit as Audit
+# import torch.nn as nn
+# import time
+# import random
+# import os
+# # import wandb
+#
+# # import optuna
+# from typing import Tuple, List
+# import sys
+# import argparse
+# import time
+# from datetime import datetime
+#
+# import numpy as np
+# import torch
+# import torch.nn as nn
+# from torch.utils.data import DataLoader, ConcatDataset, dataset
+# from torch.utils.data import DataLoader, Dataset
+# from torch.utils.data import Subset
+# import torch.optim as optim
+# import torchvision
+# import torchvision.transforms as transforms
+# # import models
+# from unlearn import *
+# from utils4 import *
+# # import forget_random_strategies_diabetes
+# # import datasets
+# # import models
+# import conf
+# from training_utils import *
 import pandas as pd
 import numpy as np
 import torch
@@ -123,7 +124,7 @@ from torch.utils.data import Dataset
 from utils_w import *
 from utils_ww import *
 # from Dataset import DataModule, CONFIG
-# from Model import get_teacher_model, get_student_model
+from Model import get_teacher_model, get_student_model
 logging.basicConfig(filename='./tc/training_log_qf1circulate_diabetesv3.log', level=logging.INFO, format='%(asctime)s %(message)s')
 logger = logging.getLogger()
 # class TableDataset(Dataset):

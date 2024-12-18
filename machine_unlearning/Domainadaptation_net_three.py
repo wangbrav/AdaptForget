@@ -15,7 +15,8 @@ from tqdm import tqdm
 import pandas as pd
 import sys
 from grad_reverse import grad_reverse
-from mu.net_three import get_student_model,get_teacher_model
+# from models.net_train_three import get_student_model, get_teacher_model
+from models.net_three import get_student_model,get_teacher_model
 # from mlp_three_csv_wu import FeatureExtractor, Classifier, CombinedModel,get_student_model, get_teacher_model
 
 
@@ -26,7 +27,7 @@ def domainadaptation(f_u,c_u, forget_loader,test_loader,lambda_domain):
     device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
     print("Using device:", device)
     model_root = 'models'
-    cuda = Tru
+    cuda = True
 
     n_epoch = 30
 

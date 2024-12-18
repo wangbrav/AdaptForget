@@ -50,3 +50,16 @@ class CombinedModel(nn.Module):
         output = self.classifier(features)
         return output
 
+
+def get_teacher_model():
+    feature_extractor_teacher = FeatureExtractor(dim_in=20, dim_hidden=256)
+    classifier_teacher = Classifier(dim_hidden=256, dim_out=2)
+    tmodelmlp = CombinedModel(feature_extractor_teacher, classifier_teacher)
+    return tmodelmlp
+
+
+def get_student_model():
+    feature_extractor_student_v1 = FeatureExtractor(dim_in=20, dim_hidden=64)
+    classifier_student_v1 = Classifier(dim_hidden=64, dim_out=2)
+    smodelmlp = CombinedModel(feature_extractor_student_v1, classifier_student_v1)
+    return smodelmlp
